@@ -1,0 +1,2 @@
+class RecipeExpanderAgent:
+    pass

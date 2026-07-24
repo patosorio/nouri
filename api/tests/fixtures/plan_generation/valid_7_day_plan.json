@@ -1,0 +1,166 @@
+{
+  "days": [
+    {
+      "day_number": 1,
+      "items": [
+        {
+          "slot_type": "breakfast",
+          "recipe_id": "generate_new",
+          "recipe_title": "Golden Turmeric Overnight Oats",
+          "servings": 1
+        },
+        {
+          "slot_type": "lunch",
+          "recipe_id": "generate_new",
+          "recipe_title": "Zucchini Pad Thai with Almond Sauce",
+          "servings": 1
+        },
+        {
+          "slot_type": "dinner",
+          "recipe_id": "generate_new",
+          "recipe_title": "Miso-Glazed Cauliflower Steaks",
+          "servings": 1
+        }
+      ]
+    },
+    {
+      "day_number": 2,
+      "items": [
+        {
+          "slot_type": "breakfast",
+          "recipe_id": "generate_new",
+          "recipe_title": "Chia Berry Pudding",
+          "servings": 1
+        },
+        {
+          "slot_type": "lunch",
+          "recipe_id": "generate_new",
+          "recipe_title": "Rainbow Buddha Bowl",
+          "servings": 1
+        },
+        {
+          "slot_type": "dinner",
+          "recipe_id": "generate_new",
+          "recipe_title": "Lentil Coconut Curry",
+          "servings": 1
+        }
+      ]
+    },
+    {
+      "day_number": 3,
+      "items": [
+        {
+          "slot_type": "breakfast",
+          "recipe_id": "generate_new",
+          "recipe_title": "Green Smoothie Bowl",
+          "servings": 1
+        },
+        {
+          "slot_type": "lunch",
+          "recipe_id": "generate_new",
+          "recipe_title": "Raw Nori Wraps",
+          "servings": 1
+        },
+        {
+          "slot_type": "dinner",
+          "recipe_id": "generate_new",
+          "recipe_title": "Stuffed Sweet Potatoes",
+          "servings": 1
+        }
+      ]
+    },
+    {
+      "day_number": 4,
+      "items": [
+        {
+          "slot_type": "breakfast",
+          "recipe_id": "generate_new",
+          "recipe_title": "Apple Cinnamon Overnight Oats",
+          "servings": 1
+        },
+        {
+          "slot_type": "lunch",
+          "recipe_id": "generate_new",
+          "recipe_title": "Kale Caesar Salad",
+          "servings": 1
+        },
+        {
+          "slot_type": "dinner",
+          "recipe_id": "generate_new",
+          "recipe_title": "Chickpea Stir Fry",
+          "servings": 1
+        }
+      ]
+    },
+    {
+      "day_number": 5,
+      "items": [
+        {
+          "slot_type": "breakfast",
+          "recipe_id": "generate_new",
+          "recipe_title": "Banana Hemp Smoothie",
+          "servings": 1
+        },
+        {
+          "slot_type": "lunch",
+          "recipe_id": "generate_new",
+          "recipe_title": "Quinoa Tabbouleh",
+          "servings": 1
+        },
+        {
+          "slot_type": "dinner",
+          "recipe_id": "generate_new",
+          "recipe_title": "Eggplant Caponata Bowl",
+          "servings": 1
+        }
+      ]
+    },
+    {
+      "day_number": 6,
+      "items": [
+        {
+          "slot_type": "breakfast",
+          "recipe_id": "generate_new",
+          "recipe_title": "Mango Coconut Chia",
+          "servings": 1
+        },
+        {
+          "slot_type": "lunch",
+          "recipe_id": "generate_new",
+          "recipe_title": "Falafel Salad Plate",
+          "servings": 1
+        },
+        {
+          "slot_type": "dinner",
+          "recipe_id": "generate_new",
+          "recipe_title": "Mushroom Risotto",
+          "servings": 1
+        }
+      ]
+    },
+    {
+      "day_number": 7,
+      "items": [
+        {
+          "slot_type": "breakfast",
+          "recipe_id": "generate_new",
+          "recipe_title": "Berry Almond Parfait",
+          "servings": 1
+        },
+        {
+          "slot_type": "lunch",
+          "recipe_id": "generate_new",
+          "recipe_title": "Vegetable Sushi Rolls",
+          "servings": 1
+        },
+        {
+          "slot_type": "dinner",
+          "recipe_id": "generate_new",
+          "recipe_title": "Black Bean Tacos",
+          "servings": 1
+        }
+      ]
+    }
+  ],
+  "generated_recipes": []
+}

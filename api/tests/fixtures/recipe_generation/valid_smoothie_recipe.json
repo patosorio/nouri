@@ -1,0 +1,50 @@
+{
+  "title": "Berry Hemp Smoothie",
+  "description": "Blended berries, hemp seeds, and banana.",
+  "servings": 1,
+  "prep_time_minutes": 5,
+  "total_time_minutes": 5,
+  "diet_type": "plant_based",
+  "prep_type": "blended",
+  "is_juicing": false,
+  "ingredients": [
+    {
+      "ingredient_name": "frozen berries",
+      "quantity": 1.5,
+      "unit": "cup",
+      "prep_type": "blended",
+      "notes": null
+    },
+    {
+      "ingredient_name": "hemp seeds",
+      "quantity": 2,
+      "unit": "tbsp",
+      "prep_type": "blended",
+      "notes": null
+    },
+    {
+      "ingredient_name": "banana",
+      "quantity": 1,
+      "unit": "medium",
+      "prep_type": "blended",
+      "notes": null
+    }
+  ],
+  "steps": [
+    {
+      "step_number": 1,
+      "instruction": "Blend all ingredients until smooth.",
+      "duration_minutes": 5,
+      "tips": null
+    }
+  ],
+  "nutrition_per_serving": {
+    "calories_kcal": 280,
+    "protein_g": 12,
+    "fat_g": 10,
+    "carbohydrates_g": 38,
+    "fiber_g": 8,
+    "sugar_g": 22,
+    "sodium_mg": 15
+  }
+}

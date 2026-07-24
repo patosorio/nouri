@@ -1,0 +1,38 @@
+services:
+  api:
+    build:
+      context: api
+      dockerfile: Dockerfile.api
+    ports:
+      - "8000:8080"
+    env_file:
+      - api/.env
+    volumes:
+      # Local/dev: pick up code changes without rebuild. Rebuild still needed for deps.
+      - ./api:/app
+    depends_on:
+      - db
+
+  worker:
+    build:
+      context: api
+      dockerfile: Dockerfile.worker
+    env_file:
+      - api/.env
+    depends_on:
+      - db
+
+  db:
+    # pgvector image required for recipe_embeddings VECTOR(1024) — docs/3_ERD.md §4.2
+    image: pgvector/pgvector:pg15
+    environment:
+      POSTGRES_DB: nouri
+      POSTGRES_USER: nouri
+      POSTGRES_PASSWORD: nouri
+    ports:
+      - "5432:5432"
+    volumes:
+      - nouri_postgres_data:/var/lib/postgresql/data
+
+volumes:
+  nouri_postgres_data:

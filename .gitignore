@@ -1,0 +1,28 @@
+# Environment
+.env
+.env.local
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+dist/
+*.egg-info/
+
+# Node.js / Next.js
+.next/
+node_modules/
+
+# macOS
+.DS_Store
+
+# Supabase
+supabase/.branches/
+supabase/.temp
+
+# Misc
+missing.txt
+
+# Cursor / Documentation
+.cursorrules
+docs/

@@ -1,0 +1,63 @@
+{
+  "title": "Zucchini Pad Thai with Almond Sauce",
+  "description": "Spiralized zucchini noodles tossed in a raw almond-tamari sauce.",
+  "servings": 2,
+  "prep_time_minutes": 15,
+  "total_time_minutes": 15,
+  "diet_type": "plant_based",
+  "prep_type": "raw",
+  "is_juicing": false,
+  "ingredients": [
+    {
+      "ingredient_name": "zucchini",
+      "quantity": 3,
+      "unit": "medium",
+      "prep_type": "raw",
+      "notes": null
+    },
+    {
+      "ingredient_name": "raw almond butter",
+      "quantity": 3,
+      "unit": "tbsp",
+      "prep_type": "raw",
+      "notes": null
+    },
+    {
+      "ingredient_name": "tamari",
+      "quantity": 2,
+      "unit": "tbsp",
+      "prep_type": null,
+      "notes": null
+    },
+    {
+      "ingredient_name": "carrots",
+      "quantity": 1,
+      "unit": "cup",
+      "prep_type": "raw",
+      "notes": "julienned"
+    }
+  ],
+  "steps": [
+    {
+      "step_number": 1,
+      "instruction": "Spiralize the zucchini into noodles.",
+      "duration_minutes": 5,
+      "tips": null
+    },
+    {
+      "step_number": 2,
+      "instruction": "Whisk almond butter with tamari and toss with noodles and carrots.",
+      "duration_minutes": 10,
+      "tips": "Add water to thin the sauce if needed."
+    }
+  ],
+  "nutrition_per_serving": {
+    "calories_kcal": 410,
+    "protein_g": 14,
+    "fat_g": 16,
+    "carbohydrates_g": 52,
+    "fiber_g": 9,
+    "sugar_g": 12,
+    "sodium_mg": 480
+  }
+}

@@ -1,0 +1,57 @@
+{
+  "title": "Imported Green Juice",
+  "description": "Cucumber, celery, green apple, and mint.",
+  "servings": 1,
+  "prep_time_minutes": 10,
+  "total_time_minutes": 10,
+  "diet_type": "plant_based",
+  "prep_type": "juiced",
+  "is_juicing": true,
+  "ingredients": [
+    {
+      "ingredient_name": "cucumber",
+      "quantity": 1,
+      "unit": "large",
+      "prep_type": "juiced",
+      "notes": null
+    },
+    {
+      "ingredient_name": "celery",
+      "quantity": 3,
+      "unit": "stalk",
+      "prep_type": "juiced",
+      "notes": null
+    },
+    {
+      "ingredient_name": "green apple",
+      "quantity": 1,
+      "unit": "medium",
+      "prep_type": "juiced",
+      "notes": null
+    },
+    {
+      "ingredient_name": "mint",
+      "quantity": 6,
+      "unit": "leaf",
+      "prep_type": "juiced",
+      "notes": null
+    }
+  ],
+  "steps": [
+    {
+      "step_number": 1,
+      "instruction": "Wash produce and juice through a cold-press juicer.",
+      "duration_minutes": 10,
+      "tips": null
+    }
+  ],
+  "nutrition_per_serving": {
+    "calories_kcal": 95,
+    "protein_g": 2,
+    "fat_g": 0.5,
+    "carbohydrates_g": 22,
+    "fiber_g": 1,
+    "sugar_g": 18,
+    "sodium_mg": 60
+  }
+}
