@@ -73,16 +73,6 @@ Supabase (PostgreSQL + pgvector + Auth + Realtime + RLS)
 
 ```
 nouri/
-├── docs/                  # All pre-development specifications
-│   ├── 1_URS.md           # User Requirements Specification
-│   ├── 2_SAD.md           # System Architecture Document
-│   ├── 3_ERD.md           # Data Model / ERD + full DDL
-│   ├── 4_API_DESIGN.yaml  # OpenAPI contract
-│   ├── 5_SECURITY_ARCH.md # Security Architecture
-│   ├── 6_DATA_INTEGRITY.md# Data Integrity Risk Assessment
-│   ├── 7_TECH_SPEC.md     # Technical Specification
-│   ├── 8_TEST_PLAN.md     # Test Plan
-│   └── Design Files/      # Brand spec, screen mockups, component inventory
 ├── api/                   # FastAPI backend → GCP Cloud Run
 │   ├── agent/             # AI orchestration layer
 │   ├── validation/        # Deterministic constraint enforcement
