@@ -15,7 +15,7 @@ from pathlib import Path
 import pytest
 
 API_ROOT = Path(__file__).resolve().parents[2]
-ALEMBIC_INI = API_ROOT / "db" / "migrations" / "alembic.ini"
+ALEMBIC_INI = API_ROOT / "alembic.ini"
 
 
 def _database_url() -> str:

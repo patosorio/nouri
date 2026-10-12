@@ -159,7 +159,7 @@ GIT_SHA=$(git rev-parse --short HEAD) docker compose up -d
 Migrations are **not** applied on container start:
 
 ```bash
-docker compose exec api alembic -c db/migrations/alembic.ini upgrade head
+docker compose exec api alembic upgrade head
 ```
 
 ### 4. Start the client

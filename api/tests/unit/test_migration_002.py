@@ -5,7 +5,7 @@ from __future__ import annotations
 from pathlib import Path
 
 _SOURCE = (
-    Path(__file__).resolve().parents[2] / "db" / "migrations" / "versions" / "002_rls_policies.py"
+    Path(__file__).resolve().parents[2] / "migrations" / "versions" / "002_rls_policies.py"
 )
 
 
