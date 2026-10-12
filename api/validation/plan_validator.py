@@ -87,16 +87,23 @@ class PlanValidator:
             )
         )
 
-        # 5. VarietyChecker (protein consecutive days + ingredient share)
+        # 5. VarietyChecker (protein run + non-staple ingredient share + meal repeat)
         protein = self._variety.check_protein_variety(plan.days)
         ingredient = self._variety.check_ingredient_variety(plan.days)
-        variety_passed = protein.passed and ingredient.passed
+        meal_repeat = self._variety.check_meal_repeat(plan.days)
+        variety_passed = (
+            protein.passed and ingredient.passed and meal_repeat.passed
+        )
         checker_results.append(
             CheckResult(
                 checker="VarietyChecker",
                 passed=variety_passed,
-                errors=protein.errors + ingredient.errors,
-                repair_hints=protein.repair_hints + ingredient.repair_hints,
+                errors=protein.errors + ingredient.errors + meal_repeat.errors,
+                repair_hints=(
+                    protein.repair_hints
+                    + ingredient.repair_hints
+                    + meal_repeat.repair_hints
+                ),
             )
         )
 
@@ -146,7 +153,9 @@ class PlanValidator:
             passed=False,
             errors=tuple(errors),
             repair_hints=(
-                "Remove or replace items containing excluded ingredients. "
-                "Exclusion violations cannot be soft-repaired — regenerate without them.",
+                (
+                    "Remove or replace items containing excluded ingredients. "
+                    "Exclusion violations cannot be soft-repaired — regenerate without them."
+                ),
             ),
         )

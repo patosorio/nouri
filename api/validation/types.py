@@ -42,6 +42,7 @@ class PlanItemView:
     primary_protein: str | None = None
     recipe_id: UUID | None = None
     ingredients: tuple[RecipeIngredientView, ...] = ()
+    nutrition_unknown: bool = False
 
 
 @dataclass(frozen=True, slots=True)

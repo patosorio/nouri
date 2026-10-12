@@ -1,0 +1,8 @@
+{"id":"P01","cooking_type":"cooked_100","calorie_target":2000,"protein_g":80,"carbs_g":250,"fat_g":70,"fiber_g":30,"sourcing_policy":"balanced","days":3}
+{"id":"P02","cooking_type":"cooked_100","calorie_target":1800,"protein_g":70,"carbs_g":220,"fat_g":60,"fiber_g":28,"sourcing_policy":"prefer_saved","days":3}
+{"id":"P03","cooking_type":"cooked_100","calorie_target":2200,"protein_g":90,"carbs_g":270,"fat_g":75,"fiber_g":32,"sourcing_policy":"prefer_new","days":3}
+{"id":"P04","cooking_type":"raw_50_cooked_50","calorie_target":2000,"protein_g":80,"carbs_g":250,"fat_g":70,"fiber_g":30,"sourcing_policy":"balanced","days":3}
+{"id":"P05","cooking_type":"cooked_100","calorie_target":1600,"protein_g":65,"carbs_g":180,"fat_g":55,"fiber_g":25,"sourcing_policy":"balanced","days":3}
+{"id":"P06","cooking_type":"cooked_100","calorie_target":2400,"protein_g":100,"carbs_g":300,"fat_g":80,"fiber_g":35,"sourcing_policy":"prefer_saved","days":3}
+{"id":"P07","cooking_type":"cooked_100","calorie_target":2000,"protein_g":80,"carbs_g":250,"fat_g":70,"fiber_g":30,"sourcing_policy":"prefer_new","days":3}
+{"id":"P08","cooking_type":"cooked_100","calorie_target":2050,"protein_g":76,"carbs_g":225,"fat_g":70,"fiber_g":35,"sourcing_policy":"balanced","days":3}

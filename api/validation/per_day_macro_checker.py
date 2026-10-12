@@ -17,6 +17,7 @@ _FIELDS = (
     ("protein_g", "protein_g"),
     ("carbs_g", "carbs_g"),
     ("fat_g", "fat_g"),
+    ("fiber_g", "fiber_g"),
 )
 
 
@@ -33,19 +34,30 @@ class PerDayMacroChecker:
         results: list[DayMacroCheckResult] = []
 
         for day in days:
-            actual = self._calculator.compute_day_totals(day.items)
+            known_items = tuple(
+                item for item in day.items if not item.nutrition_unknown
+            )
+            actual = self._calculator.compute_day_totals(known_items)
             errors: list[str] = []
             hints: list[str] = []
+            for item in day.items:
+                if not item.nutrition_unknown:
+                    continue
+                errors.append(
+                    f"Day {day.day_number} totals incomplete: "
+                    f"{item.name} has no nutrition"
+                )
+                hints.append(
+                    f"Day {day.day_number} cannot be on target until "
+                    f"{item.name} has nutrition."
+                )
 
             for attr, label in _FIELDS:
                 target_val = getattr(targets, attr)
                 actual_val = getattr(actual, attr)
-                if target_val == 0:
-                    if actual_val != 0:
-                        errors.append(
-                            f"Day {day.day_number}: {label} actual {actual_val} "
-                            f"but target is 0"
-                        )
+                if target_val <= 0:
+                    # Unset / unused macro target — do not enforce (profile may only
+                    # set calories). A zero target is not "must be exactly zero".
                     continue
 
                 ratio = actual_val / target_val

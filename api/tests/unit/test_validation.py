@@ -5,7 +5,6 @@ from __future__ import annotations
 from uuid import uuid4
 
 import pytest
-
 from exceptions import NutritionOutOfRangeError
 from validation.exclusion_checker import ExclusionChecker
 from validation.macro_calculator import MacroCalculator
@@ -70,10 +69,12 @@ def _item(
     primary_protein: str | None = "legumes",
     ingredients: tuple[RecipeIngredientView, ...] = (),
     recipe_id=None,
+    slot: str = "lunch",
 ) -> PlanItemView:
     return PlanItemView(
         day_number=day,
         name=name,
+        slot=slot,
         calories=calories,
         protein_g=protein_g,
         carbs_g=carbs_g,
@@ -293,6 +294,34 @@ def test_below_tolerance_fails_with_repair_hint(targets: MacroTargets) -> None:
     assert any("day 2" in h.lower() for h in results[0].repair_hints)
 
 
+def test_zero_macro_targets_are_skipped() -> None:
+    """Unset profile macros (0) must not fail when actual macros are present."""
+    days = (
+        _day(
+            1,
+            _item(
+                1,
+                "meal",
+                calories=2000,
+                protein_g=47,
+                carbs_g=145,
+                fat_g=12,
+                fiber_g=10,
+            ),
+        ),
+    )
+    targets = MacroTargets(
+        calories=2050.0,
+        protein_g=0.0,
+        carbs_g=0.0,
+        fat_g=0.0,
+        fiber_g=0.0,
+    )
+    results = PerDayMacroChecker().check(days, targets)
+    assert results[0].passed is True
+    assert results[0].errors == ()
+
+
 # ---------------------------------------------------------------------------
 # RatioChecker
 # ---------------------------------------------------------------------------
@@ -344,16 +373,17 @@ def test_protein_source_repeated_3_consecutive_days_fails() -> None:
 
 def test_repair_hint_identifies_repeated_ingredient_and_day() -> None:
     spinach = RecipeIngredientView(name="spinach", ingredient_id=SPINACH_ID)
-    # 3 of 4 recipes contain spinach → 75% > 60%
+    # 4 of 5 recipes contain spinach → 80% > 75%
     days = (
         _day(1, _item(1, "a", ingredients=(spinach,), recipe_id=uuid4())),
         _day(2, _item(2, "b", ingredients=(spinach,), recipe_id=uuid4())),
         _day(3, _item(3, "c", ingredients=(spinach,), recipe_id=uuid4())),
+        _day(4, _item(4, "d", ingredients=(spinach,), recipe_id=uuid4())),
         _day(
-            4,
+            5,
             _item(
-                4,
-                "d",
+                5,
+                "e",
                 ingredients=(RecipeIngredientView(name="kale", ingredient_id=uuid4()),),
                 recipe_id=uuid4(),
             ),
@@ -362,6 +392,37 @@ def test_repair_hint_identifies_repeated_ingredient_and_day() -> None:
     result = VarietyChecker().check_ingredient_variety(days)
     assert result.passed is False
     assert any("spinach" in h and "day" in h for h in result.repair_hints)
+
+
+def test_staple_ingredients_ignored_by_frequency_check() -> None:
+    ginger = RecipeIngredientView(name="fresh ginger", ingredient_id=uuid4())
+    lemon = RecipeIngredientView(name="lemon", ingredient_id=uuid4())
+    days = tuple(
+        _day(
+            i,
+            _item(
+                i,
+                f"meal-{i}",
+                ingredients=(ginger, lemon),
+                recipe_id=uuid4(),
+            ),
+        )
+        for i in range(1, 6)
+    )
+    result = VarietyChecker().check_ingredient_variety(days)
+    assert result.passed is True
+
+
+def test_same_dinner_on_consecutive_days_fails_meal_repeat() -> None:
+    shared = uuid4()
+    days = (
+        _day(1, _item(1, "Bowl", slot="dinner", recipe_id=shared)),
+        _day(2, _item(2, "Bowl", slot="dinner", recipe_id=shared)),
+        _day(3, _item(3, "Other", slot="dinner", recipe_id=uuid4())),
+    )
+    result = VarietyChecker().check_meal_repeat(days)
+    assert result.passed is False
+    assert any("dinner" in e and "consecutive" in e for e in result.errors)
 
 
 # ---------------------------------------------------------------------------

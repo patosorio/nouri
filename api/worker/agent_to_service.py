@@ -11,20 +11,43 @@ from db.models import (
     PlanItemSource,
     PlanSlot,
     PreparationType,
+    PrimaryProtein,
     RecipeSource,
     RecipeType,
 )
+from exceptions import PlanGenerationFailedError
 from schemas import agent as agent_schemas
 from schemas.plans import GeneratedPlanData, GeneratedPlanDay, GeneratedPlanItem
-from schemas.recipes import RecipeDraft, RecipeIngredientDraft, RecipeStepDraft
+from schemas.recipes import (
+    RecipeDraft,
+    RecipeIngredientDraft,
+    RecipeNutritionDraft,
+    RecipeStepDraft,
+)
+
+_RAWISH_PREP = frozenset(
+    {
+        PreparationType.RAW,
+        PreparationType.JUICED,
+        PreparationType.BLENDED,
+        PreparationType.DEHYDRATED,
+        PreparationType.SPROUTED,
+        PreparationType.FERMENTED,
+    }
+)
 
 
 def map_generated_plan(
     agent_plan: agent_schemas.GeneratedPlanData,
+    *,
+    saved_ids: set[UUID],
 ) -> GeneratedPlanData:
-    generated_ids = {
-        r.assigned_id for r in agent_plan.generated_recipes if r.assigned_id is not None
+    generated_by_id = {
+        r.assigned_id: r
+        for r in agent_plan.generated_recipes
+        if r.assigned_id is not None
     }
+    generated_ids = set(generated_by_id)
     recipe_drafts = [
         map_generated_recipe(r) for r in agent_plan.generated_recipes
     ]
@@ -40,19 +63,89 @@ def map_generated_plan(
                     recipe_title=item.recipe_title,
                     recipe_id=recipe_id,
                     servings=item.servings,
-                    recipe_type=_recipe_type_for_slot(item.slot_type),
-                    prep_method=None,
-                    item_source=(
-                        PlanItemSource.AI_GENERATED
-                        if recipe_id is not None and recipe_id in generated_ids
-                        else PlanItemSource.SAVED_RECIPE
-                    ),
+                    recipe_type=_recipe_type_for_item(item, generated_by_id),
+                    prep_method=item.prep_method,
+                    item_source=_item_source(recipe_id, generated_ids, saved_ids),
                     slot_order=index,
+                    calories=decimal_or_none(item.calories),
+                    protein_g=decimal_or_none(item.protein_g),
+                    carbs_g=decimal_or_none(item.carbs_g),
+                    fat_g=decimal_or_none(item.fat_g),
+                    fiber_g=decimal_or_none(item.fiber_g),
+                    juice_time=item.juice_time,
+                    juice_size_ml=item.juice_size_ml,
+                    nutrition_unknown=item.nutrition_unknown,
                 )
             )
-        days.append(GeneratedPlanDay(day_number=day.day_number, items=items))
+        days.append(
+            GeneratedPlanDay(
+                day_number=day.day_number,
+                items=items,
+                totals_incomplete=any(item.nutrition_unknown for item in items),
+            )
+        )
 
-    return GeneratedPlanData(days=days, generated_recipes=recipe_drafts)
+    return GeneratedPlanData(
+        days=days,
+        generated_recipes=recipe_drafts,
+        review_notes=agent_plan.review_notes,
+    )
+
+
+def placed_recipe_ids(plan: GeneratedPlanData) -> set[UUID]:
+    ids: set[UUID] = set()
+    for day in plan.days:
+        for item in day.items:
+            if item.recipe_id is not None:
+                ids.add(item.recipe_id)
+    return ids
+
+
+def filter_unplaced_generated(plan: GeneratedPlanData) -> GeneratedPlanData:
+    placed = placed_recipe_ids(plan)
+    return plan.model_copy(
+        update={
+            "generated_recipes": [
+                draft
+                for draft in plan.generated_recipes
+                if draft.id is not None and draft.id in placed
+            ]
+        }
+    )
+
+
+def remap_reused_recipe_ids(
+    plan: GeneratedPlanData, id_remap: dict[UUID, UUID]
+) -> GeneratedPlanData:
+    if not id_remap:
+        return plan
+    days: list[GeneratedPlanDay] = []
+    for day in plan.days:
+        items: list[GeneratedPlanItem] = []
+        for item in day.items:
+            if item.recipe_id is not None and item.recipe_id in id_remap:
+                items.append(
+                    item.model_copy(
+                        update={
+                            "recipe_id": id_remap[item.recipe_id],
+                            "item_source": PlanItemSource.SAVED_RECIPE,
+                        }
+                    )
+                )
+            else:
+                items.append(item)
+        days.append(day.model_copy(update={"items": items}))
+    reused = set(id_remap)
+    return plan.model_copy(
+        update={
+            "days": days,
+            "generated_recipes": [
+                draft
+                for draft in plan.generated_recipes
+                if draft.id is None or draft.id not in reused
+            ],
+        }
+    )
 
 
 def map_generated_recipe(
@@ -68,6 +161,20 @@ def map_generated_recipe(
         meal_roles = [MealRole(recipe.slot_type)]
     except ValueError:
         meal_roles = []
+
+    nutrition = None
+    if recipe.nutrition_per_serving is not None:
+        n = recipe.nutrition_per_serving
+        nutrition = RecipeNutritionDraft(
+            calories_per_serving=Decimal(str(n.calories_kcal)),
+            protein_g=Decimal(str(n.protein_g)),
+            carbs_g=Decimal(str(n.carbohydrates_g)),
+            fat_g=Decimal(str(n.fat_g)),
+            fiber_g=Decimal(str(n.fiber_g)),
+            sugar_g=Decimal(str(n.sugar_g)) if n.sugar_g is not None else None,
+        )
+
+    primary = recipe.primary_protein or PrimaryProtein.NONE
 
     return RecipeDraft(
         id=recipe.assigned_id,
@@ -99,6 +206,22 @@ def map_generated_recipe(
         cooking_type=cooking,
         diet_types=[recipe.diet_type],
         meal_roles=meal_roles,
+        nutrition=nutrition,
+        primary_protein_source=primary,
+    )
+
+
+def _item_source(
+    recipe_id: UUID | None,
+    generated_ids: set[UUID],
+    saved_ids: set[UUID],
+) -> PlanItemSource:
+    if recipe_id is None or recipe_id in generated_ids:
+        return PlanItemSource.AI_GENERATED
+    if recipe_id in saved_ids:
+        return PlanItemSource.SAVED_RECIPE
+    raise PlanGenerationFailedError(
+        f"Recipe {recipe_id} is not a saved or generated recipe"
     )
 
 
@@ -111,6 +234,17 @@ def _coerce_recipe_id(value: UUID | str) -> UUID | None:
         return UUID(str(value))
     except (TypeError, ValueError):
         return None
+
+
+def _recipe_type_for_item(
+    item: agent_schemas.GeneratedPlanItemAI,
+    generated_by_id: dict[UUID, agent_schemas.GeneratedRecipeAI],
+) -> RecipeType:
+    """Generated dishes keep the recipe's type. Saved dishes fall back to the slot."""
+    recipe_id = item.recipe_id if isinstance(item.recipe_id, UUID) else None
+    if recipe_id is not None and recipe_id in generated_by_id:
+        return _recipe_type_for_slot(generated_by_id[recipe_id].slot_type)
+    return _recipe_type_for_slot(item.slot_type)
 
 
 def _recipe_type_for_slot(slot_type: str) -> RecipeType:

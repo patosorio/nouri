@@ -17,4 +17,7 @@ def test_eval_plan_quality_placeholder() -> None:
 
     Blocked on agent prompt approval for PlanGeneratorAgent.
     """
-    pytest.skip("Live eval — enable after PlanGeneratorAgent prompts are approved")
+    pytest.skip(
+        "Live Anthropic eval — deterministic assigner gold lives in "
+        "tests/unit/test_gold_assigner.py (8 profiles in tests/evals/gold/profiles.jsonl)"
+    )

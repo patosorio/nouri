@@ -1,10 +1,9 @@
 from __future__ import annotations
 
-from datetime import date, timedelta
+from collections.abc import Awaitable, Callable
+from datetime import datetime, timedelta, timezone
+from typing import Any
 from uuid import UUID
-
-from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from db.models import (
     JobQueue,
@@ -14,12 +13,17 @@ from db.models import (
     PlanItem,
     PlanItemSource,
     PlanStatus,
+    Recipe,
+    RecipeType,
 )
-from exceptions import NotFoundError, OwnershipError
+from exceptions import NotFoundError, OwnershipError, PlanGenerationFailedError
 from schemas.plans import (
     GeneratedPlanData,
     PlanGenerationParams,
 )
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from services._helpers import get_owned_recipe, get_profile_or_404
 
 
@@ -68,7 +72,7 @@ class PlanService:
             if params.calorie_target is not None
             else profile.calorie_target
         )
-        week_start = params.week_start_date or date.today()
+        week_start = params.week_start_date or datetime.now(timezone.utc).date()
 
         plan = MealPlan(
             user_id=user_id,
@@ -133,8 +137,6 @@ class PlanService:
         self, plan_id: UUID, user_id: UUID, db: AsyncSession
     ) -> None:
         plan = await self._get_owned_plan(plan_id, user_id, db)
-        if plan.status == PlanStatus.APPROVED:
-            raise OwnershipError("Approved plans cannot be deleted")
         await db.delete(plan)
         await db.flush()
 
@@ -156,10 +158,14 @@ class PlanService:
         plan_id: UUID,
         generated: GeneratedPlanData,
         db: AsyncSession,
+        *,
+        on_day_written: Callable[[int, int], Awaitable[None]] | None = None,
     ) -> MealPlan:
         plan = await db.get(MealPlan, plan_id)
         if plan is None:
             raise NotFoundError("Meal plan not found")
+
+        recipe_types = await self._owned_recipe_types(plan.user_id, generated, db)
 
         # Clear existing days/items if regenerating
         existing_days = await db.execute(
@@ -171,6 +177,13 @@ class PlanService:
 
         if generated.title is not None:
             plan.title = generated.title
+        if generated.review_notes:
+            existing = (plan.notes or "").strip()
+            plan.notes = (
+                f"{existing}\n\n{generated.review_notes}".strip()
+                if existing
+                else generated.review_notes
+            )
 
         for day_data in generated.days:
             day_date = day_data.date
@@ -181,11 +194,18 @@ class PlanService:
                 plan_id=plan.id,
                 day_number=day_data.day_number,
                 date=day_date,
+                totals_incomplete=any(
+                    item.nutrition_unknown for item in day_data.items
+                )
+                or day_data.totals_incomplete,
             )
             db.add(day)
             await db.flush()
 
             day_calories = day_protein = day_carbs = day_fat = day_fiber = 0.0
+            known_items = [
+                item for item in day_data.items if not item.nutrition_unknown
+            ]
             for item_data in day_data.items:
                 item = PlanItem(
                     plan_day_id=day.id,
@@ -195,7 +215,11 @@ class PlanService:
                     item_source=item_data.item_source,
                     name=item_data.recipe_title,
                     description=item_data.description,
-                    recipe_type=item_data.recipe_type,
+                    recipe_type=(
+                        recipe_types.get(item_data.recipe_id, item_data.recipe_type)
+                        if item_data.recipe_id is not None
+                        else item_data.recipe_type
+                    ),
                     color=item_data.color,
                     prep_method=item_data.prep_method,
                     prep_minutes=item_data.prep_minutes,
@@ -204,8 +228,12 @@ class PlanService:
                     carbs_g=item_data.carbs_g,
                     fat_g=item_data.fat_g,
                     fiber_g=item_data.fiber_g,
+                    juice_time=item_data.juice_time,
+                    juice_size_ml=item_data.juice_size_ml,
+                    nutrition_unknown=item_data.nutrition_unknown,
                 )
                 db.add(item)
+            for item_data in known_items:
                 day_calories += float(item_data.calories or 0)
                 day_protein += float(item_data.protein_g or 0)
                 day_carbs += float(item_data.carbs_g or 0)
@@ -222,11 +250,64 @@ class PlanService:
             day.carbs_g_target = plan.carbs_g_target_snapshot
             day.fat_g_target = plan.fat_g_target_snapshot
             day.fiber_g_target = plan.fiber_g_target_snapshot
+            await db.flush()
+            if on_day_written is not None:
+                await on_day_written(day_data.day_number, len(generated.days))
 
         plan.status = PlanStatus.REVIEWING
         await db.flush()
         await db.refresh(plan)
         return plan
+
+    async def _assert_recipes_owned(
+        self,
+        user_id: UUID,
+        generated: GeneratedPlanData,
+        db: AsyncSession,
+    ) -> None:
+        """Reject foreign or missing recipe ids before any day is written."""
+        await self._owned_recipe_types(user_id, generated, db)
+
+    async def _owned_recipe_types(
+        self,
+        user_id: UUID,
+        generated: GeneratedPlanData,
+        db: AsyncSession,
+    ) -> dict[UUID, RecipeType]:
+        """Owned recipe ids mapped to the recipe's own recipe_type."""
+        ids = list(
+            dict.fromkeys(
+                item.recipe_id
+                for day in generated.days
+                for item in day.items
+                if item.recipe_id is not None
+            )
+        )
+        if not ids:
+            return {}
+        result = await db.execute(
+            select(Recipe.id, Recipe.recipe_type).where(
+                Recipe.id.in_(ids),
+                Recipe.user_id == user_id,
+                Recipe.deleted_at.is_(None),
+            )
+        )
+        owned_ids: set[UUID] = set()
+        types: dict[UUID, RecipeType] = {}
+        for row in result.all():
+            if isinstance(row, UUID):
+                owned_ids.add(row)
+                continue
+            recipe_id, recipe_type = row[0], row[1]
+            owned_ids.add(recipe_id)
+            if isinstance(recipe_type, RecipeType):
+                types[recipe_id] = recipe_type
+        for recipe_id in ids:
+            if recipe_id not in owned_ids:
+                raise PlanGenerationFailedError(
+                    f"Recipe {recipe_id} not owned by user"
+                )
+        return types
 
     async def swap_plan_item(
         self,
@@ -270,6 +351,50 @@ class PlanService:
         await db.flush()
         await db.refresh(item)
         return item
+
+    async def apply_recipe_nutrition_to_items(
+        self,
+        recipe_id: UUID,
+        nutrition: Any,
+        db: AsyncSession,
+    ) -> None:
+        """Copy recipe_nutrition onto plan_items that still have null snapshots."""
+        items_result = await db.execute(
+            select(PlanItem).where(PlanItem.recipe_id == recipe_id)
+        )
+        items = list(items_result.scalars().all())
+        if not items:
+            return
+
+        touched_days: set[UUID] = set()
+        for item in items:
+            if item.calories is not None:
+                continue
+            item.calories = nutrition.calories_per_serving
+            item.protein_g = nutrition.protein_g
+            item.carbs_g = nutrition.carbs_g
+            item.fat_g = nutrition.fat_g
+            item.fiber_g = nutrition.fiber_g
+            item.nutrition_unknown = False
+            touched_days.add(item.plan_day_id)
+
+        for day_id in touched_days:
+            day = await db.get(PlanDay, day_id)
+            if day is None:
+                continue
+            day_items_result = await db.execute(
+                select(PlanItem).where(PlanItem.plan_day_id == day_id)
+            )
+            day_items = list(day_items_result.scalars().all())
+            known = [item for item in day_items if not item.nutrition_unknown]
+            day.totals_incomplete = any(item.nutrition_unknown for item in day_items)
+            day.calories_actual = sum(float(item.calories or 0) for item in known)
+            day.protein_g_actual = sum(float(item.protein_g or 0) for item in known)
+            day.carbs_g_actual = sum(float(item.carbs_g or 0) for item in known)
+            day.fat_g_actual = sum(float(item.fat_g or 0) for item in known)
+            day.fiber_g_actual = sum(float(item.fiber_g or 0) for item in known)
+
+        await db.flush()
 
     async def approve_plan(
         self, plan_id: UUID, user_id: UUID, db: AsyncSession

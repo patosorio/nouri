@@ -8,6 +8,7 @@ from typing import Any
 from uuid import UUID
 
 from db.models import (
+    Conversation,
     JobQueue,
     MealPlan,
     Notification,
@@ -40,7 +41,7 @@ def _date(value: date | None) -> str | None:
     return value.isoformat()
 
 
-def _num(value: Decimal | float | int | None) -> float | int | None:
+def _num(value: Decimal | float | None) -> float | int | None:
     if value is None:
         return None
     if isinstance(value, Decimal):
@@ -92,7 +93,32 @@ def serialize_exclusion(row: UserExclusion) -> dict[str, Any]:
     }
 
 
-def serialize_plan_summary(plan: MealPlan) -> dict[str, Any]:
+def serialize_generation(job: JobQueue | None) -> dict[str, Any] | None:
+    if job is None:
+        return None
+    result = job.result if isinstance(job.result, dict) else {}
+    progress = result.get("progress_pct")
+    days_completed = result.get("days_completed")
+    days_total = result.get("days_total")
+    if job.status.value == "completed":
+        progress = 100
+    return {
+        "job_id": str(job.id),
+        "status": _enum(job.status),
+        "progress_pct": int(progress) if isinstance(progress, (int, float)) else 0,
+        "stage": result.get("stage") if isinstance(result.get("stage"), str) else None,
+        "days_completed": (
+            int(days_completed) if isinstance(days_completed, (int, float)) else 0
+        ),
+        "days_total": int(days_total) if isinstance(days_total, (int, float)) else 0,
+        "error_message": job.error_message,
+        "attempts": job.attempts,
+    }
+
+
+def serialize_plan_summary(
+    plan: MealPlan, *, generation: dict[str, Any] | None = None
+) -> dict[str, Any]:
     return {
         "id": str(plan.id),
         "title": plan.title,
@@ -101,6 +127,7 @@ def serialize_plan_summary(plan: MealPlan) -> dict[str, Any]:
         "week_start_date": _date(plan.week_start_date),
         "scheduled_date": _date(plan.scheduled_date),
         "created_at": _dt(plan.created_at),
+        "generation": generation,
     }
 
 
@@ -119,7 +146,9 @@ def serialize_plan_item(item: PlanItem, *, day_number: int, plan_id: UUID) -> di
         "color": item.color,
         "prep_minutes": item.prep_minutes,
         "slot_order": item.slot_order,
-        "juice_time": None,
+        "juice_time": _enum(item.juice_time),
+        "juice_size_ml": item.juice_size_ml,
+        "nutrition_unknown": bool(item.nutrition_unknown),
         "calories": _num(item.calories),
         "protein_g": _num(item.protein_g),
         "carbs_g": _num(item.carbs_g),
@@ -143,6 +172,7 @@ def serialize_plan_day(day: PlanDay, items: list[PlanItem], *, plan_id: UUID) ->
         "carbs_g_target": _num(day.carbs_g_target),
         "fat_g_target": _num(day.fat_g_target),
         "fiber_g_target": _num(day.fiber_g_target),
+        "totals_incomplete": bool(day.totals_incomplete),
         "items": [
             serialize_plan_item(i, day_number=day.day_number, plan_id=plan_id)
             for i in items
@@ -153,6 +183,8 @@ def serialize_plan_day(day: PlanDay, items: list[PlanItem], *, plan_id: UUID) ->
 def serialize_meal_plan(
     plan: MealPlan,
     days: list[tuple[PlanDay, list[PlanItem]]],
+    *,
+    generation: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     return {
         "id": str(plan.id),
@@ -174,6 +206,7 @@ def serialize_meal_plan(
         "notes": plan.notes,
         "created_at": _dt(plan.created_at),
         "updated_at": _dt(plan.updated_at),
+        "generation": generation,
     }
 
 
@@ -318,4 +351,30 @@ def serialize_notification(row: Notification) -> dict[str, Any]:
         "data": row.data or {},
         "is_read": row.is_read,
         "created_at": _dt(row.created_at),
+    }
+
+
+def serialize_conversation_summary(
+    conversation: Conversation, *, message_count: int
+) -> dict[str, Any]:
+    return {
+        "id": str(conversation.id),
+        "plan_id": str(conversation.plan_id) if conversation.plan_id else None,
+        "message_count": message_count,
+        "model_version": conversation.model_version,
+        "created_at": _dt(conversation.created_at),
+        "updated_at": _dt(conversation.updated_at),
+    }
+
+
+def serialize_conversation(
+    conversation: Conversation, messages: list[dict[str, str]]
+) -> dict[str, Any]:
+    return {
+        "id": str(conversation.id),
+        "plan_id": str(conversation.plan_id) if conversation.plan_id else None,
+        "messages": messages,
+        "model_version": conversation.model_version,
+        "created_at": _dt(conversation.created_at),
+        "updated_at": _dt(conversation.updated_at),
     }

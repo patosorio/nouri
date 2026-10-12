@@ -4,16 +4,15 @@ from dataclasses import dataclass
 from uuid import UUID
 
 import jwt
+from config import settings
+from db.session import get_db
 from fastapi import Depends, HTTPException, Request, status
 from jwt import PyJWKClient
-from sqlalchemy import select
+from services.profile_service import ProfileService
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from config import settings
-from db.models import UserProfile
-from db.session import get_db as get_db  # noqa: F401 — re-export
-
-# Cached JWKS client — PyJWKClient fetches and caches keys; lifespan matches process.
+# FastAPI reads these once; B008 forbids the call in a parameter default.
+_db = Depends(get_db)
 _jwks_client: PyJWKClient | None = None
 
 
@@ -24,7 +23,7 @@ def _get_jwks_client() -> PyJWKClient:
         if base.startswith("SUPABASE_URL="):
             # Common .env mistake: value includes the key name.
             base = base.split("=", 1)[1].strip().strip('"').strip("'")
-        if not (base.startswith("http://") or base.startswith("https://")):
+        if not base.startswith(("http://", "https://")):
             raise HTTPException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
                 detail={
@@ -107,7 +106,7 @@ def _decode_access_token(token: str) -> dict[str, object]:
 
 async def get_current_user(
     request: Request,
-    db: AsyncSession = Depends(get_db),
+    db: AsyncSession = _db,
 ) -> CurrentUser:
     token = _extract_bearer_token(request)
     claims = _decode_access_token(token)
@@ -124,29 +123,25 @@ async def get_current_user(
     email_claim = claims.get("email")
     email = email_claim if isinstance(email_claim, str) else ""
 
-    # Tier from DB (source of truth) — docs/5_SECURITY_ARCH.md §4.2
-    # ERD vocabulary: free | pro (see missing.txt for paid vs pro conflict)
-    result = await db.execute(
-        select(UserProfile.tier).where(UserProfile.id == user_id)
-    )
-    tier_value = result.scalar_one_or_none()
-    if tier_value is None:
-        tier = "free"
-    else:
-        tier = tier_value.value if hasattr(tier_value, "value") else str(tier_value)
+    profile = await ProfileService().ensure_profile(user_id, db)
+    tier_value = profile.tier
+    tier = tier_value.value if hasattr(tier_value, "value") else str(tier_value)
 
     request.state.user_id = user_id
     return CurrentUser(id=user_id, email=email, tier=tier)
 
 
+_current_user = Depends(get_current_user)
+
+
 async def get_tier(
-    current_user: CurrentUser = Depends(get_current_user),
+    current_user: CurrentUser = _current_user,
 ) -> str:
     return current_user.tier
 
 
 async def require_paid_tier(
-    current_user: CurrentUser = Depends(get_current_user),
+    current_user: CurrentUser = _current_user,
 ) -> CurrentUser:
     # ERD: user_tier_enum = free | pro. Phase 2 prompt said "paid" — see missing.txt.
     if current_user.tier != "pro":

@@ -2,18 +2,47 @@ from __future__ import annotations
 
 from uuid import UUID
 
+from db.models import AuthUser, Ingredient, UserExclusion, UserProfile, UserTier
+from exceptions import NotFoundError, OwnershipError
+from schemas.profile import ProfileCreate, ProfileUpdate
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from db.models import AuthUser, Ingredient, UserExclusion, UserProfile
-from exceptions import NotFoundError, OwnershipError
-from schemas.profile import ProfileCreate, ProfileUpdate
 from services._helpers import get_profile_or_404
 
 
 class ProfileService:
     async def get_profile(self, user_id: UUID, db: AsyncSession) -> UserProfile:
         return await get_profile_or_404(user_id, db)
+
+    async def ensure_profile(self, user_id: UUID, db: AsyncSession) -> UserProfile:
+        """Create auth.users + user_profiles stubs so FKs can succeed.
+
+        Hosted Supabase Auth issues a JWT before this database has a matching
+        user_profiles row. conversations / meal_plans / job_queue all FK to
+        user_profiles. Onboarding later updates the stub.
+        """
+        profile = await db.get(UserProfile, user_id)
+        if profile is not None:
+            return profile
+        auth_user = await db.get(AuthUser, user_id)
+        if auth_user is None:
+            db.add(AuthUser(id=user_id))
+            await db.flush()
+        profile = UserProfile(id=user_id)
+        db.add(profile)
+        await db.flush()
+        await db.refresh(profile)
+        return profile
+
+    async def set_tier(
+        self, user_id: UUID, tier: UserTier, db: AsyncSession
+    ) -> UserProfile:
+        profile = await self.ensure_profile(user_id, db)
+        profile.tier = tier
+        await db.flush()
+        await db.refresh(profile)
+        return profile
 
     async def create_profile(
         self, user_id: UUID, data: ProfileCreate, db: AsyncSession
