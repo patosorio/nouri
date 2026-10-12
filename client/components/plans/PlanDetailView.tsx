@@ -4,11 +4,13 @@ import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { DayTab } from "@/components/plans/DayTab";
 import { GenerateDrawer } from "@/components/plans/GenerateDrawer";
+import { GenerationProgressBar } from "@/components/plans/GenerationProgressBar";
 import { JuiceSlotRow } from "@/components/plans/JuiceSlotRow";
 import { MealSlotCard } from "@/components/plans/MealSlotCard";
 import { RecipeDetailPanel } from "@/components/plans/RecipeDetailPanel";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { PageShell } from "@/components/shared/PageShell";
+import { DisclaimerBanner } from "@/components/shared/DisclaimerBanner";
 import { NutritionStrip } from "@/components/shared/NutritionStrip";
 import { SourcingPolicyBadge } from "@/components/shared/SourcingPolicyBadge";
 import { useRightPanel } from "@/components/shared/right-panel-context";
@@ -95,6 +97,7 @@ export function PlanDetailView({ planId }: PlanDetailViewProps) {
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ["plans", planId] });
       void queryClient.invalidateQueries({ queryKey: ["plans"] });
+      void queryClient.invalidateQueries({ queryKey: ["calendar"] });
     },
   });
 
@@ -126,9 +129,13 @@ export function PlanDetailView({ planId }: PlanDetailViewProps) {
           setPanelMode("swap");
           void swapMutation.mutateAsync(item.id);
         }}
-        onApprove={() => {
-          void approveMutation.mutateAsync();
-        }}
+        onApprove={
+          plan?.status !== "approved"
+            ? () => {
+                void approveMutation.mutateAsync();
+              }
+            : undefined
+        }
       />,
       { width: 360 },
     );
@@ -217,12 +224,20 @@ export function PlanDetailView({ planId }: PlanDetailViewProps) {
         />
         <div className="max-w-[560px] rounded-card border border-border bg-white px-6 py-8">
           <p className="font-sans text-body text-text">
-            This plan is still generating.
+            {plan.generation?.status === "failed"
+              ? "Generation failed."
+              : "This plan is being created in the background."}
           </p>
           <p className="mt-2 font-sans text-sm text-text-muted">
-            Meals appear here once generation finishes. You can start another
-            plan anytime.
+            {plan.generation?.status === "failed"
+              ? plan.generation.error_message ??
+                "You can generate a new plan anytime."
+              : "You can keep using the app. We'll notify you when it's ready."}
           </p>
+          <GenerationProgressBar
+            generation={plan.generation}
+            numDays={plan.num_days}
+          />
         </div>
         <GenerateDrawer open={generateOpen} onOpenChange={setGenerateOpen} />
       </PageShell>
@@ -231,6 +246,7 @@ export function PlanDetailView({ planId }: PlanDetailViewProps) {
 
   const mealItems = day.items.filter((item) => item.slot !== "juice");
   const juiceItems = day.items.filter((item) => item.slot === "juice");
+  const needsApproval = plan.status === "reviewing" || plan.status === "draft";
 
   return (
     <PageShell className="pb-16">
@@ -245,10 +261,20 @@ export function PlanDetailView({ planId }: PlanDetailViewProps) {
         }`}
         actions={
           <>
+            {needsApproval ? (
+              <button
+                type="button"
+                onClick={() => void approveMutation.mutateAsync()}
+                disabled={approveMutation.isPending}
+                className="btn-primary"
+              >
+                {approveMutation.isPending ? "Approving…" : "Approve plan"}
+              </button>
+            ) : null}
             <button
               type="button"
               onClick={() => setGenerateOpen(true)}
-              className="btn-primary"
+              className={needsApproval ? "btn-ghost" : "btn-primary"}
             >
               Generate New Plan
             </button>
@@ -267,6 +293,13 @@ export function PlanDetailView({ planId }: PlanDetailViewProps) {
       {exportError ? (
         <p className="mb-4 font-sans text-body-sm text-cta">{exportError}</p>
       ) : null}
+      {approveMutation.isError ? (
+        <p className="mb-4 font-sans text-body-sm text-cta">
+          {approveMutation.error instanceof ApiError
+            ? approveMutation.error.message
+            : "Could not approve this plan."}
+        </p>
+      ) : null}
 
       <NutritionStrip
         title="Weekly Nutrition"
@@ -281,6 +314,8 @@ export function PlanDetailView({ planId }: PlanDetailViewProps) {
           ) : null
         }
       />
+
+      <DisclaimerBanner className="mb-7" />
 
       <div className="mb-6 flex w-fit flex-wrap gap-1.5 rounded-pill bg-surface p-1.5">
         {plan.days.map((d) => (

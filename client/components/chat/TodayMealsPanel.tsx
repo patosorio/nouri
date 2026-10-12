@@ -1,9 +1,17 @@
+"use client";
+
 import Link from "next/link";
+import { History } from "lucide-react";
 import { EyebrowLabel } from "@/components/shared/EyebrowLabel";
+import { DisclaimerBanner } from "@/components/shared/DisclaimerBanner";
 import { NutritionStrip } from "@/components/shared/NutritionStrip";
 import { RawCookedTag } from "@/components/shared/RawCookedTag";
 import { toRawCookedTag } from "@/lib/cooking";
-import type { PlanItem } from "@/lib/types";
+import type { PlanGenerationProgress, PlanItem } from "@/lib/types";
+import {
+  GenerationProgressBar,
+  isGenerationInFlight,
+} from "@/components/plans/GenerationProgressBar";
 import { cn } from "@/lib/utils";
 
 interface TodayMealsPanelProps {
@@ -14,6 +22,10 @@ interface TodayMealsPanelProps {
   weekProteinG?: number | null;
   weekCarbsG?: number | null;
   weekFatG?: number | null;
+  onGenerate?: () => void;
+  onHistory?: () => void;
+  generation?: PlanGenerationProgress | null;
+  numDays?: number;
   className?: string;
 }
 
@@ -25,12 +37,17 @@ export function TodayMealsPanel({
   weekProteinG,
   weekCarbsG,
   weekFatG,
+  onGenerate,
+  onHistory,
+  generation,
+  numDays = 7,
   className,
 }: TodayMealsPanelProps) {
   const hasWeekNutrition =
     weekCalories != null &&
     weekProteinG != null &&
     weekCarbsG != null;
+  const creating = isGenerationInFlight(generation);
 
   return (
     <div className={cn("flex h-full flex-col gap-4", className)}>
@@ -47,20 +64,60 @@ export function TodayMealsPanel({
         />
       ) : (
         <p className="font-sans text-body-sm italic text-text-muted">
-          No active plan nutrition yet.
+          {creating
+            ? "This week is being created."
+            : "No active plan nutrition yet."}
         </p>
       )}
+      <GenerationProgressBar generation={generation} numDays={numDays} />
+      {hasWeekNutrition ? <DisclaimerBanner /> : null}
 
-      <Link href={planId ? `/plans/${planId}` : "/plans"} className="btn-primary w-full">
-        Generate New Plan
-      </Link>
+      <div className="flex items-stretch gap-2">
+        {onGenerate ? (
+          <button
+            type="button"
+            onClick={onGenerate}
+            className="btn-primary min-w-0 flex-1"
+          >
+            Generate New Plan
+          </button>
+        ) : (
+          <Link
+            href={planId ? `/plans/${planId}` : "/plans"}
+            className="btn-primary min-w-0 flex-1"
+          >
+            Generate New Plan
+          </Link>
+        )}
+        {onHistory ? (
+          <button
+            type="button"
+            onClick={onHistory}
+            aria-label="Past conversations"
+            title="Past conversations"
+            className="flex size-12 shrink-0 items-center justify-center rounded-pill border-[1.5px] border-primary bg-transparent text-primary"
+          >
+            <History className="size-5" aria-hidden />
+          </button>
+        ) : null}
+      </div>
+      {planId ? (
+        <Link
+          href={`/plans/${planId}`}
+          className="font-mono text-[10px] uppercase tracking-[0.08em] text-primary no-underline"
+        >
+          Open this week
+        </Link>
+      ) : null}
 
       <EyebrowLabel className="mt-2">Today&apos;s Meals</EyebrowLabel>
 
       <div className="flex flex-1 flex-col gap-3 overflow-y-auto">
         {items.length === 0 ? (
           <p className="font-sans text-body-sm italic text-text-muted">
-            No meals scheduled for today yet.
+            {creating
+              ? "Building this week in the background…"
+              : "No meals scheduled for today yet."}
           </p>
         ) : (
           items.map((item) => (

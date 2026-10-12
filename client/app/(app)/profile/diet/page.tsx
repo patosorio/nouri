@@ -48,7 +48,7 @@ export default function ProfileDietPage() {
     useState<CookingType>("raw_80_cooked_20");
   const [subtypes, setSubtypes] = useState<string[]>([]);
   const [cuisines, setCuisines] = useState<string[]>([]);
-  const [calorieTarget, setCalorieTarget] = useState(2050);
+  const [calorieTarget, setCalorieTarget] = useState<number | null>(null);
 
   useEffect(() => {
     if (!profile) return;
@@ -56,7 +56,7 @@ export default function ProfileDietPage() {
     setCookingType(profile.cooking_type);
     setSubtypes(profile.diet_subtypes);
     setCuisines(profile.cuisine_prefs);
-    setCalorieTarget(profile.calorie_target ?? 2050);
+    setCalorieTarget(profile.calorie_target ?? null);
   }, [profile]);
 
   if (isLoading || !profile) {
@@ -162,8 +162,16 @@ export default function ProfileDietPage() {
         </p>
         <input
           type="number"
-          value={calorieTarget}
-          onChange={(e) => setCalorieTarget(Number(e.target.value))}
+          value={calorieTarget ?? ""}
+          onChange={(e) => {
+            const raw = e.target.value;
+            if (raw === "") {
+              setCalorieTarget(null);
+              return;
+            }
+            const parsed = Number(raw);
+            setCalorieTarget(Number.isFinite(parsed) ? parsed : null);
+          }}
           className="w-full rounded-input border border-border bg-surface px-3.5 py-2.5 font-sans text-body text-text outline-none focus:border-primary"
         />
       </div>

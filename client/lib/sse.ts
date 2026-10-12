@@ -1,4 +1,11 @@
-export type SseEventType = "text_delta" | "tool_call" | "done" | "error";
+import type { PlanProposal } from "@/lib/types";
+
+export type SseEventType =
+  | "text_delta"
+  | "tool_call"
+  | "done"
+  | "error"
+  | "plan_proposal";
 
 export interface SseEvent {
   type: SseEventType;
@@ -9,6 +16,7 @@ export interface SseEvent {
   error?: string | null;
   code?: string | null;
   message?: string | null;
+  plan_proposal?: PlanProposal | null;
 }
 
 /**

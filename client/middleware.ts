@@ -1,5 +1,9 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import {
+  hasSupabaseAuthCookie,
+  readPublicSupabaseEnv,
+} from "@/lib/supabase-public-env";
 
 const PROTECTED_PREFIXES = [
   "/chat",
@@ -18,6 +22,13 @@ function isProtectedPath(pathname: string): boolean {
   );
 }
 
+function redirectToLogin(request: NextRequest, pathname: string): NextResponse {
+  const loginUrl = request.nextUrl.clone();
+  loginUrl.pathname = "/login";
+  loginUrl.searchParams.set("next", pathname);
+  return NextResponse.redirect(loginUrl);
+}
+
 export async function middleware(request: NextRequest): Promise<NextResponse> {
   let response = NextResponse.next({
     request: {
@@ -25,14 +36,32 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
     },
   });
 
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-
-  if (!supabaseUrl || !supabaseAnonKey) {
+  const env = readPublicSupabaseEnv();
+  if (env === null) {
     return response;
   }
 
-  const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
+  const { pathname } = request.nextUrl;
+  const sessionCookie = hasSupabaseAuthCookie(request.cookies.getAll());
+
+  // Public routes must not wait on hosted Auth. Leftover sb-* cookies plus a
+  // paused/unreachable project made every / and /login hit hang on getUser().
+  if (!isProtectedPath(pathname)) {
+    return response;
+  }
+
+  if (!sessionCookie) {
+    return redirectToLogin(request, pathname);
+  }
+
+  const supabase = createServerClient(env.url, env.anonKey, {
+    global: {
+      fetch: (input, init) =>
+        fetch(input, {
+          ...init,
+          signal: AbortSignal.timeout(2_500),
+        }),
+    },
     cookies: {
       getAll() {
         return request.cookies.getAll();
@@ -53,24 +82,18 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
     },
   });
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  const { pathname } = request.nextUrl;
-
-  if (!user && isProtectedPath(pathname)) {
-    const loginUrl = request.nextUrl.clone();
-    loginUrl.pathname = "/login";
-    loginUrl.searchParams.set("next", pathname);
-    return NextResponse.redirect(loginUrl);
+  let user: { id: string } | null = null;
+  try {
+    const { data, error } = await supabase.auth.getUser();
+    if (error === null) {
+      user = data.user;
+    }
+  } catch {
+    user = null;
   }
 
-  if (user && (pathname === "/login" || pathname === "/signup")) {
-    const chatUrl = request.nextUrl.clone();
-    chatUrl.pathname = "/chat";
-    chatUrl.search = "";
-    return NextResponse.redirect(chatUrl);
+  if (!user) {
+    return redirectToLogin(request, pathname);
   }
 
   return response;

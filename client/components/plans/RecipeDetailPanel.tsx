@@ -25,6 +25,7 @@ export function RecipeDetailPanel({
   dayLabel,
   onClose,
   onSwap,
+  onApprove,
   className,
 }: RecipeDetailPanelProps) {
   const { data: recipe, isLoading } = useRecipe(
@@ -140,6 +141,15 @@ export function RecipeDetailPanel({
         >
           Swap This Meal
         </button>
+        {onApprove ? (
+          <button
+            type="button"
+            onClick={onApprove}
+            className="w-full btn-ghost"
+          >
+            Approve plan
+          </button>
+        ) : null}
         {planItem.recipe_id ? (
           <Link
             href={`/recipes/${planItem.recipe_id}`}

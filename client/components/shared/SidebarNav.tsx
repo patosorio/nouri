@@ -1,5 +1,8 @@
+"use client";
+
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { NotificationBell } from "@/components/shared/NotificationBell";
 import { cn } from "@/lib/utils";
 
 interface NavItem {
@@ -56,20 +59,22 @@ export function SidebarNav() {
         })}
       </div>
 
-      <div className="mx-1 my-3 h-px bg-border" />
-
-      <Link
-        href="/profile"
-        className={cn(
-          navItemClass,
-          "text-center",
-          isActive(pathname, "/profile")
-            ? "bg-primary/10 text-primary"
-            : "text-text-muted hover:bg-primary/[0.04] hover:text-text",
-        )}
-      >
-        Profile / Settings
-      </Link>
+      <div className="mt-auto flex flex-col gap-3">
+        <NotificationBell />
+        <div className="mx-1 h-px bg-border" />
+        <Link
+          href="/profile"
+          className={cn(
+            navItemClass,
+            "text-center",
+            isActive(pathname, "/profile")
+              ? "bg-primary/10 text-primary"
+              : "text-text-muted hover:bg-primary/[0.04] hover:text-text",
+          )}
+        >
+          Profile / Settings
+        </Link>
+      </div>
     </nav>
   );
 }

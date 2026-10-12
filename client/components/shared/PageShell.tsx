@@ -16,7 +16,7 @@ export function PageShell({ children, className, wide = false }: PageShellProps)
   return (
     <div
       className={cn(
-        "flex-1 overflow-y-auto px-8 py-8",
+        "min-h-0 flex-1 overflow-y-auto px-8 py-8",
         wide && "lg:px-10",
         className,
       )}

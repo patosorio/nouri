@@ -1,16 +1,21 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { ChatInputBar } from "@/components/chat/ChatInputBar";
 import { ChatMessage } from "@/components/chat/ChatMessage";
+import { ConversationHistoryPanel } from "@/components/chat/ConversationHistoryPanel";
 import { SuggestedPromptChip } from "@/components/chat/SuggestedPromptChip";
 import { TodayMealsPanel } from "@/components/chat/TodayMealsPanel";
+import { isGenerationInFlight } from "@/components/plans/GenerationProgressBar";
+import { GeneratePlanForm, type GeneratePlanDraft } from "@/components/plans/GeneratePlanForm";
+import { EyebrowLabel } from "@/components/shared/EyebrowLabel";
 import { useRightPanel } from "@/components/shared/right-panel-context";
-import { Skeleton } from "@/components/ui/skeleton";
 import { usePlans, usePlan, useProfile } from "@/hooks";
 import { apiClient } from "@/lib/api-client";
 import { readSseStream } from "@/lib/sse";
 import type { PlanItem } from "@/lib/types";
+import { History } from "lucide-react";
 
 interface ThreadMessage {
   id: string;
@@ -18,6 +23,13 @@ interface ThreadMessage {
   content: string;
   streaming?: boolean;
 }
+
+const WELCOME: ThreadMessage = {
+  id: "welcome",
+  role: "assistant",
+  content:
+    "Hi — I'm Nouri, your food advisor. Ask about today's meals, swap a recipe, or generate a new plan.",
+};
 
 const SUGGESTED_PROMPTS = [
   "Swap dinner",
@@ -71,23 +83,28 @@ function avgNutrition(
 
 export default function ChatPage() {
   const { setRightPanel } = useRightPanel();
+  const queryClient = useQueryClient();
   const { data: profile } = useProfile();
-  const { data: plansData } = usePlans({ limit: 1, status: "approved" });
-  const activePlanId = plansData?.data[0]?.id;
+  const { data: plansData } = usePlans({ limit: 10 });
+  const activePlanId = useMemo(() => {
+    const plans = plansData?.data ?? [];
+    const inflight = plans.find((plan) => isGenerationInFlight(plan.generation));
+    if (inflight) return inflight.id;
+    const usable = plans.find((plan) => plan.generation?.status !== "failed");
+    return usable?.id ?? plans[0]?.id;
+  }, [plansData]);
   const { data: activePlan } = usePlan(activePlanId);
 
-  const [messages, setMessages] = useState<ThreadMessage[]>([
-    {
-      id: "welcome",
-      role: "assistant",
-      content:
-        "Hi — I'm Nouri, your food advisor. Ask about today's meals, swap a recipe, or generate a new plan.",
-    },
-  ]);
+  const [messages, setMessages] = useState<ThreadMessage[]>([WELCOME]);
   const [draft, setDraft] = useState("");
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [sending, setSending] = useState(false);
-  const bottomRef = useRef<HTMLDivElement>(null);
+  const [panelMode, setPanelMode] = useState<"today" | "generate" | "history">(
+    "today",
+  );
+  const [planDraft, setPlanDraft] = useState<GeneratePlanDraft | null>(null);
+  const [draftToken, setDraftToken] = useState(0);
+  const threadRef = useRef<HTMLDivElement>(null);
 
   const todayItems = useMemo(
     () => todayItemsFromPlan(activePlan?.days),
@@ -95,7 +112,77 @@ export default function ChatPage() {
   );
   const weekAvg = useMemo(() => avgNutrition(activePlan?.days), [activePlan?.days]);
 
+  function startNewConversation() {
+    setConversationId(null);
+    setMessages([WELCOME]);
+    setPlanDraft(null);
+    setPanelMode("today");
+  }
+
+  async function loadConversation(id: string) {
+    try {
+      const conversation = await apiClient.getConversation(id);
+      setConversationId(conversation.id);
+      setMessages(
+        conversation.messages.map((message, index) => ({
+          id: `${conversation.id}-${index}`,
+          role: message.role,
+          content: message.content,
+        })),
+      );
+      setPanelMode("today");
+    } catch {
+      setPanelMode("today");
+    }
+  }
+
   useEffect(() => {
+    if (panelMode === "generate") {
+      setRightPanel(
+        <div className="flex h-full min-h-0 flex-col gap-4">
+          <div className="flex items-start justify-between gap-2">
+            <div>
+              <EyebrowLabel>This plan</EyebrowLabel>
+              <p className="m-0 mt-2 font-sans text-title font-semibold text-text">
+                Generate <em>New Plan</em>
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setPanelMode("history")}
+              aria-label="Past conversations"
+              title="Past conversations"
+              className="flex size-10 shrink-0 items-center justify-center rounded-pill border-[1.5px] border-primary bg-transparent text-primary"
+            >
+              <History className="size-5" aria-hidden />
+            </button>
+          </div>
+          <GeneratePlanForm
+            resetToken={draftToken}
+            draft={planDraft}
+            conversationId={conversationId}
+            onClose={() => setPanelMode("today")}
+          />
+        </div>,
+        { width: 520 },
+      );
+      return () => setRightPanel(null);
+    }
+
+    if (panelMode === "history") {
+      setRightPanel(
+        <ConversationHistoryPanel
+          activeId={conversationId}
+          onSelect={(id) => {
+            void loadConversation(id);
+          }}
+          onNew={startNewConversation}
+          onBack={() => setPanelMode("today")}
+        />,
+      );
+      return () => setRightPanel(null);
+    }
+
     setRightPanel(
       <TodayMealsPanel
         items={todayItems}
@@ -109,13 +196,33 @@ export default function ChatPage() {
         weekProteinG={weekAvg?.protein ?? null}
         weekCarbsG={weekAvg?.carbs ?? null}
         weekFatG={weekAvg?.fat ?? null}
+        generation={activePlan?.generation}
+        numDays={activePlan?.num_days ?? 7}
+        onGenerate={() => {
+          setPlanDraft(null);
+          setDraftToken((n) => n + 1);
+          setPanelMode("generate");
+        }}
+        onHistory={() => setPanelMode("history")}
       />,
     );
     return () => setRightPanel(null);
-  }, [setRightPanel, todayItems, activePlanId, activePlan, weekAvg]);
+  }, [
+    setRightPanel,
+    panelMode,
+    planDraft,
+    draftToken,
+    conversationId,
+    todayItems,
+    activePlanId,
+    activePlan,
+    weekAvg,
+  ]);
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    const thread = threadRef.current;
+    if (!thread) return;
+    thread.scrollTo({ top: thread.scrollHeight, behavior: "smooth" });
   }, [messages]);
 
   useEffect(() => {
@@ -159,6 +266,15 @@ export default function ChatPage() {
       }
 
       await readSseStream(response, (event) => {
+        if (event.type === "plan_proposal" && event.plan_proposal) {
+          setPlanDraft({
+            ...event.plan_proposal,
+            conversation_id:
+              event.conversation_id ?? headerConversationId ?? conversationId,
+          });
+          setDraftToken((n) => n + 1);
+          setPanelMode("generate");
+        }
         if (event.type === "text_delta" && event.text) {
           setMessages((prev) =>
             prev.map((m) =>
@@ -174,7 +290,15 @@ export default function ChatPage() {
           }
           setMessages((prev) =>
             prev.map((m) =>
-              m.id === assistantId ? { ...m, streaming: false } : m,
+              m.id === assistantId
+                ? {
+                    ...m,
+                    streaming: false,
+                    content:
+                      m.content ||
+                      "I'm here — ask about today's meals, a swap, or a new plan.",
+                  }
+                : m,
             ),
           );
         }
@@ -212,6 +336,7 @@ export default function ChatPage() {
       );
     } finally {
       setSending(false);
+      void queryClient.invalidateQueries({ queryKey: ["conversations"] });
     }
   }
 
@@ -221,8 +346,8 @@ export default function ChatPage() {
   ];
 
   return (
-    <div className="flex h-screen min-h-0 flex-1 flex-col bg-bg">
-      <header className="flex items-center justify-between border-b border-border bg-surface px-8 py-5">
+    <div className="flex h-full min-h-0 flex-1 flex-col overflow-hidden bg-bg">
+      <header className="flex shrink-0 items-center justify-between border-b border-border bg-surface px-8 py-5">
         <div>
           <p className="font-sans text-title font-semibold text-text">Nouri</p>
           <span className="font-mono text-eyebrow-sm uppercase tracking-[0.12em] text-primary">
@@ -231,7 +356,7 @@ export default function ChatPage() {
         </div>
       </header>
 
-      <div className="min-h-0 flex-1 overflow-y-auto">
+      <div ref={threadRef} className="min-h-0 flex-1 overflow-y-auto">
         <div className="flex flex-col gap-5 px-8 py-8">
           {messages.map((message) => (
             <ChatMessage
@@ -239,18 +364,19 @@ export default function ChatPage() {
               role={message.role}
               content={
                 message.streaming && !message.content ? (
-                  <Skeleton className="h-4 w-40" />
+                  <p className="m-0 italic text-text-muted">
+                    Nouri is thinking…
+                  </p>
                 ) : (
                   message.content
                 )
               }
             />
           ))}
-          <div ref={bottomRef} />
         </div>
       </div>
 
-      <div className="border-t border-border bg-surface px-8 pb-7 pt-5">
+      <div className="shrink-0 border-t border-border bg-surface px-8 pb-7 pt-5">
         <div className="mb-3 flex flex-wrap gap-2.5">
           {prompts.map((label) => (
             <SuggestedPromptChip
@@ -268,6 +394,11 @@ export default function ChatPage() {
           onSend={sendMessage}
           disabled={sending}
         />
+        {sending ? (
+          <p className="mt-2 font-mono text-[10px] uppercase tracking-[0.08em] text-text-muted">
+            Waiting for Nouri — keep this tab open.
+          </p>
+        ) : null}
       </div>
     </div>
   );

@@ -5,6 +5,7 @@ import { IngredientRow } from "@/components/recipes/IngredientRow";
 import { ServingsAdjuster } from "@/components/recipes/ServingsAdjuster";
 import { StepRow } from "@/components/recipes/StepRow";
 import { EyebrowLabel } from "@/components/shared/EyebrowLabel";
+import { DisclaimerBanner } from "@/components/shared/DisclaimerBanner";
 import { NutritionStrip } from "@/components/shared/NutritionStrip";
 import { RawCookedTag } from "@/components/shared/RawCookedTag";
 import { SourceBadge } from "@/components/shared/SourceBadge";
@@ -85,7 +86,7 @@ export function RecipeDetailView({ recipeId }: RecipeDetailViewProps) {
     .join(" · ");
 
   return (
-    <div className="flex-1 overflow-y-auto px-8 py-10 lg:px-14">
+    <div className="min-h-0 flex-1 overflow-y-auto px-8 py-10 lg:px-14">
       <div className="grid grid-cols-1 items-start gap-10 lg:grid-cols-[1.35fr_1fr] lg:gap-14">
         <div>
           <div className="mb-2 flex flex-wrap items-center gap-2.5">
@@ -207,14 +208,9 @@ export function RecipeDetailView({ recipeId }: RecipeDetailViewProps) {
               carbsG={nutrition.carbs_g}
               fatG={nutrition.fat_g}
               fiberG={nutrition.fiber_g}
-              footer={
-                <p className="mt-4 border-t border-white/15 pt-3 font-mono text-[10.5px] leading-relaxed tracking-[0.01em] text-white/65">
-                  AI-estimated values — for educational guidance only, not a
-                  substitute for clinical nutrition advice.
-                </p>
-              }
             />
           ) : null}
+          {nutrition ? <DisclaimerBanner className="mt-3" /> : null}
 
           <button
             type="button"

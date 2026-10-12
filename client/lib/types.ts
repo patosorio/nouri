@@ -193,6 +193,17 @@ export interface ExclusionPayload {
   ingredient_name_raw: string;
 }
 
+export interface PlanGenerationProgress {
+  job_id: string;
+  status: JobStatus;
+  progress_pct: number;
+  stage: string | null;
+  days_completed: number;
+  days_total: number;
+  error_message: string | null;
+  attempts: number;
+}
+
 export interface MealPlanSummary {
   id: string;
   title: string | null;
@@ -201,6 +212,7 @@ export interface MealPlanSummary {
   week_start_date: string;
   scheduled_date: string | null;
   created_at: string;
+  generation?: PlanGenerationProgress | null;
 }
 
 export interface PlanGenerationParams {
@@ -212,6 +224,18 @@ export interface PlanGenerationParams {
   include_juicing?: boolean;
   notes?: string | null;
   cloned_from_plan_id?: string | null;
+  week_start_date?: string | null;
+  conversation_id?: string | null;
+}
+
+export interface PlanProposal {
+  num_days: number;
+  diet_type: DietType;
+  cooking_type?: CookingType | null;
+  calorie_target?: number | null;
+  recipe_usage_policy?: RecipeUsagePolicy | null;
+  include_juicing?: boolean;
+  notes?: string | null;
 }
 
 export interface NutritionSummary {
@@ -279,6 +303,7 @@ export interface MealPlan {
   notes: string | null;
   created_at: string;
   updated_at: string;
+  generation?: PlanGenerationProgress | null;
 }
 
 export interface SwapPayload {

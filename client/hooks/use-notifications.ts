@@ -11,6 +11,7 @@ export function useNotifications(params?: {
   return useQuery({
     queryKey: ["notifications", params ?? {}],
     queryFn: () => apiClient.listNotifications(params),
+    refetchInterval: 8000,
   });
 }
 
