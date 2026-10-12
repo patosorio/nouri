@@ -1,0 +1,17 @@
+# Local dev only. Docker Compose loads this file automatically.
+# Production deploys use the Dockerfiles and do not use this override.
+# GIT_SHA is the host short sha when you start Compose with
+#   GIT_SHA=$(git rev-parse --short HEAD) docker compose up -d
+# The worker container does not have .git, so this is the sha it logs.
+services:
+  api:
+    command: ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8080", "--reload"]
+    environment:
+      GIT_SHA: ${GIT_SHA:-unknown}
+
+  worker:
+    command: ["watchfiles", "--filter", "python", "python -m worker.main", "/app"]
+    volumes:
+      - ./api:/app
+    environment:
+      GIT_SHA: ${GIT_SHA:-unknown}
