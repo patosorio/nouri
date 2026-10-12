@@ -4,15 +4,19 @@ from __future__ import annotations
 
 from decimal import Decimal
 from typing import Any
+from uuid import UUID
 
 import structlog
-from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
-
-from agent.client import AnthropicClient
 from config import AgentTask, route_model
 from db.models import Ingredient, Recipe, RecipeIngredient
+from exceptions import NutritionOutOfRangeError
 from schemas.recipes import RecipeNutritionDraft
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+from validation.nutrition_validator import NutritionValidator
+from validation.types import NutritionPerServing
+
+from agent.client import AnthropicClient
 
 logger = structlog.get_logger(__name__)
 
@@ -57,6 +61,7 @@ class NutritionEstimatorAgent:
 
     def __init__(self, client: AnthropicClient | None = None) -> None:
         self._client = client or AnthropicClient()
+        self._nutrition = NutritionValidator()
 
     async def estimate(
         self,
@@ -64,6 +69,7 @@ class NutritionEstimatorAgent:
         db: AsyncSession,
         *,
         trace_id: str | None = None,
+        job_id: UUID | None = None,
     ) -> RecipeNutritionDraft:
         ingredients = await db.execute(
             select(RecipeIngredient, Ingredient)
@@ -104,11 +110,14 @@ class NutritionEstimatorAgent:
             max_tokens=1024,
             system=system,
             trace_id=trace_id,
+            user_id=recipe.user_id,
+            job_id=job_id,
+            task=AgentTask.NUTRITIONAL_PROFILE.value,
         )
         for block in message.content:
             if block.type == "tool_use" and block.name == "output_nutrition":
                 data = dict(block.input or {})
-                return RecipeNutritionDraft(
+                draft = RecipeNutritionDraft(
                     calories_per_serving=Decimal(str(data["calories_per_serving"])),
                     protein_g=Decimal(str(data["protein_g"])),
                     carbs_g=Decimal(str(data["carbs_g"])),
@@ -128,4 +137,23 @@ class NutritionEstimatorAgent:
                         data.get("nutritional_highlights") or []
                     ),
                 )
+                try:
+                    self._nutrition.check(
+                        NutritionPerServing(
+                            calories_kcal=float(draft.calories_per_serving),
+                            protein_g=float(draft.protein_g),
+                            fat_g=float(draft.fat_g),
+                            carbohydrates_g=float(draft.carbs_g),
+                            fiber_g=float(draft.fiber_g),
+                        )
+                    )
+                except NutritionOutOfRangeError as exc:
+                    logger.warning(
+                        "nutrition_estimate_out_of_range",
+                        recipe_id=str(recipe.id),
+                        field=exc.field,
+                        value=exc.value,
+                        trace_id=trace_id,
+                    )
+                return draft
         raise ValueError(f"No nutrition tool output for recipe {recipe.id}")

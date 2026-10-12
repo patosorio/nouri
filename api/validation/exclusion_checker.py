@@ -4,7 +4,8 @@ from __future__ import annotations
 
 from uuid import UUID
 
-from validation.types import ExclusionView, RecipeView
+from validation.text_match import contains
+from validation.types import ExclusionView, RecipeIngredientView, RecipeView
 
 
 class ExclusionChecker:
@@ -55,6 +56,18 @@ class ExclusionChecker:
     ) -> list[UUID]:
         return [r.id for r in self.filter_candidates(candidates, user_exclusions)]
 
+    def first_violation(
+        self,
+        recipe: RecipeView,
+        user_exclusions: list[ExclusionView] | tuple[ExclusionView, ...],
+    ) -> tuple[str, str] | None:
+        """Return (ingredient name, exclusion name) for the first hit."""
+        for ingredient in recipe.ingredients:
+            for exclusion in user_exclusions:
+                if self._ingredient_matches(ingredient, exclusion):
+                    return ingredient.name, exclusion.raw_name
+        return None
+
     def _ingredient_excluded(
         self,
         ingredient_id: UUID | None,
@@ -62,28 +75,27 @@ class ExclusionChecker:
         aliases: tuple[str, ...],
         exclusions: list[ExclusionView] | tuple[ExclusionView, ...],
     ) -> bool:
-        name_norm = name.strip().lower()
-        alias_norms = {a.strip().lower() for a in aliases}
+        ingredient = RecipeIngredientView(
+            name=name, ingredient_id=ingredient_id, aliases=aliases
+        )
+        return any(self._ingredient_matches(ingredient, exclusion) for exclusion in exclusions)
 
-        for exclusion in exclusions:
-            if (
-                ingredient_id is not None
-                and exclusion.ingredient_id is not None
-                and ingredient_id == exclusion.ingredient_id
-            ):
-                return True
+    def _ingredient_matches(
+        self, ingredient: RecipeIngredientView, exclusion: ExclusionView
+    ) -> bool:
+        if (
+            ingredient.ingredient_id is not None
+            and exclusion.ingredient_id is not None
+            and ingredient.ingredient_id == exclusion.ingredient_id
+        ):
+            return True
 
-            excl_raw = exclusion.raw_name.strip().lower()
-            excl_aliases = {a.strip().lower() for a in exclusion.aliases}
-
-            # Unresolved ingredient: case-insensitive name match (tech spec §6.2)
-            if ingredient_id is None and name_norm == excl_raw:
-                return True
-
-            # Alias cross-match (RISK-05): recipe name/aliases vs exclusion name/aliases
-            recipe_names = {name_norm} | alias_norms
-            exclusion_names = {excl_raw} | excl_aliases
-            if recipe_names & exclusion_names:
-                return True
-
+        # Token containment runs even when ids differ. Alias cross-match uses
+        # the same rule: an exclusion token run inside a recipe name or alias.
+        ingredient_labels = (ingredient.name, *ingredient.aliases)
+        exclusion_labels = (exclusion.raw_name, *exclusion.aliases)
+        for ingredient_label in ingredient_labels:
+            for exclusion_label in exclusion_labels:
+                if exclusion_label.strip() and contains(ingredient_label, exclusion_label):
+                    return True
         return False

@@ -6,10 +6,6 @@ import base64
 from typing import Any
 from uuid import UUID
 
-from fastapi import APIRouter, BackgroundTasks, Depends, File, Form, Query, Response, UploadFile, status
-from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
-
 from agent.recipe_generator import RecipeGeneratorAgent
 from agent.recipe_importer import RecipeImporterAgent
 from db.models import (
@@ -23,10 +19,16 @@ from db.models import (
 )
 from dependencies import CurrentUser, get_current_user, get_db
 from exceptions import NotFoundError, TierGateError
-from routers.serializers import (
-    pagination_meta,
-    serialize_recipe,
-    serialize_recipe_list_item,
+from fastapi import (
+    APIRouter,
+    BackgroundTasks,
+    Depends,
+    File,
+    Form,
+    Query,
+    Response,
+    UploadFile,
+    status,
 )
 from schemas.agent import RecipeDraft as AgentRecipeDraft
 from schemas.agent import RecipeGenerationRequest
@@ -35,9 +37,22 @@ from schemas.recipes import RecipeFilters, RecipeUpdate
 from search.embedding_jobs import embed_recipe_by_id
 from search.recipe_search_service import RecipeSearchService
 from services.recipe_service import RecipeService
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from routers.serializers import (
+    pagination_meta,
+    serialize_recipe,
+    serialize_recipe_list_item,
+)
 
 router = APIRouter()
 _service = RecipeService()
+_current_user = Depends(get_current_user)
+_db = Depends(get_db)
+_offset = Query(0, ge=0)
+_limit = Query(30, ge=1, le=30)
+_optional_file = File(None)
 
 
 def _agent_draft_to_api(draft: AgentRecipeDraft) -> dict[str, Any]:
@@ -142,13 +157,13 @@ async def _load_recipe_response(
 
 @router.get("/recipes")
 async def list_recipes(
-    offset: int = Query(0, ge=0),
-    limit: int = Query(30, ge=1, le=30),
+    offset: int = _offset,
+    limit: int = _limit,
     recipe_type: RecipeType | None = None,
     prep_method: PreparationType | None = None,
     cooking_type: CookingType | None = None,
-    current_user: CurrentUser = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db),
+    current_user: CurrentUser = _current_user,
+    db: AsyncSession = _db,
 ) -> dict[str, object]:
     filters = RecipeFilters(
         recipe_type=recipe_type,
@@ -167,14 +182,14 @@ async def list_recipes(
 @router.get("/recipes/search")
 async def search_recipes(
     q: str | None = None,
-    offset: int = Query(0, ge=0),
-    limit: int = Query(30, ge=1, le=30),
+    offset: int = _offset,
+    limit: int = _limit,
     recipe_type: RecipeType | None = None,
     prep_method: PreparationType | None = None,
     cooking_type: CookingType | None = None,
     diet_type: DietType | None = None,
-    current_user: CurrentUser = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db),
+    current_user: CurrentUser = _current_user,
+    db: AsyncSession = _db,
 ) -> dict[str, object]:
     filters = RecipeFilters(
         q=q,
@@ -198,8 +213,8 @@ async def search_recipes(
 async def save_recipe(
     body: RecipeSavePayload,
     background_tasks: BackgroundTasks,
-    current_user: CurrentUser = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db),
+    current_user: CurrentUser = _current_user,
+    db: AsyncSession = _db,
 ) -> dict[str, object]:
     recipe = await _service.save_recipe(current_user.id, body.draft, db)
     background_tasks.add_task(embed_recipe_by_id, recipe.id)
@@ -209,9 +224,9 @@ async def save_recipe(
 @router.post("/recipes/import")
 async def import_recipe(
     text: str | None = Form(None),
-    file: UploadFile | None = File(None),
-    current_user: CurrentUser = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db),
+    file: UploadFile | None = _optional_file,
+    current_user: CurrentUser = _current_user,
+    db: AsyncSession = _db,
 ) -> dict[str, object]:
     importer = RecipeImporterAgent()
     if file is not None and file.filename:
@@ -251,7 +266,6 @@ async def _import_from_bytes(
         "— accuracy of the source comes first — but flag the conflict in notes "
         "so the user is warned before saving. Call output_recipe once with the "
         "extracted recipe.\n"
-        f"<exclusion_constraints>{exclusion_constraint}</exclusion_constraints>"
     )
     b64 = base64.b64encode(raw).decode("ascii")
     content = [
@@ -266,6 +280,9 @@ async def _import_from_bytes(
         {
             "type": "text",
             "text": (
+                "<exclusion_constraints>"
+                f"{exclusion_constraint}"
+                "</exclusion_constraints>\n"
                 "Extract the complete recipe from this image. Include every "
                 "ingredient with its quantity and unit, and every step in order."
             ),
@@ -276,14 +293,14 @@ async def _import_from_bytes(
         user_content=content,
         model=route_model(AgentTask.RECIPE_IMPORT_IMAGE),
     )
-    return await importer._postprocess(draft, system_prompt, db)
+    return await importer._postprocess(draft, db)
 
 
 @router.get("/recipes/{recipe_id}")
 async def get_recipe(
     recipe_id: UUID,
-    current_user: CurrentUser = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db),
+    current_user: CurrentUser = _current_user,
+    db: AsyncSession = _db,
 ) -> dict[str, object]:
     return await _load_recipe_response(recipe_id, current_user.id, db)
 
@@ -293,8 +310,8 @@ async def update_recipe(
     recipe_id: UUID,
     body: RecipeUpdate,
     background_tasks: BackgroundTasks,
-    current_user: CurrentUser = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db),
+    current_user: CurrentUser = _current_user,
+    db: AsyncSession = _db,
 ) -> dict[str, object]:
     await _service.update_recipe(recipe_id, current_user.id, body, db)
     background_tasks.add_task(embed_recipe_by_id, recipe_id)
@@ -308,8 +325,8 @@ async def update_recipe(
 )
 async def delete_recipe(
     recipe_id: UUID,
-    current_user: CurrentUser = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db),
+    current_user: CurrentUser = _current_user,
+    db: AsyncSession = _db,
 ) -> Response:
     await _service.delete_recipe(recipe_id, current_user.id, db)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
@@ -319,8 +336,8 @@ async def delete_recipe(
 async def expand_recipe(
     recipe_id: UUID,
     body: RecipeExpandPayload,
-    current_user: CurrentUser = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db),
+    current_user: CurrentUser = _current_user,
+    db: AsyncSession = _db,
 ) -> dict[str, object]:
     await _service.get_recipe(recipe_id, current_user.id, db)
     draft = await RecipeGeneratorAgent().generate(

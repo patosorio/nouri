@@ -7,18 +7,18 @@ from typing import Any
 from uuid import UUID
 
 import structlog
-from sqlalchemy.ext.asyncio import AsyncSession
-
-from agent.client import AnthropicClient
-from config import AgentTask, route_model, settings
+from config import AgentTask, route_model
 from exceptions import NutritionOutOfRangeError
 from preprocessing.exclusion_service import ExclusionService
 from schemas.agent import RecipeDraft, RecipeGenerationRequest
 from services.profile_service import ProfileService
 from services.recipe_service import RecipeService
+from sqlalchemy.ext.asyncio import AsyncSession
 from validation.exclusion_checker import ExclusionChecker
 from validation.nutrition_validator import NutritionValidator
 from validation.types import ExclusionView, NutritionPerServing
+
+from agent.client import AnthropicClient, cached_system_blocks, with_cached_last_tool
 
 logger = structlog.get_logger(__name__)
 
@@ -33,11 +33,14 @@ def _recipe_output_schema() -> dict[str, Any]:
     """Tech-spec recipe JSON without post-parse fields (ingredient_id, unresolved)."""
     schema = RecipeDraft.model_json_schema()
     props = schema.get("properties", {})
-    props.pop("unresolved_ingredient_names", None)
+    for hidden in ("unresolved_ingredient_names", "nutrition_flagged"):
+        props.pop(hidden, None)
     required = schema.get("required")
     if isinstance(required, list):
         schema["required"] = [
-            r for r in required if r != "unresolved_ingredient_names"
+            r
+            for r in required
+            if r not in ("unresolved_ingredient_names", "nutrition_flagged")
         ]
     # Nested ingredient defs may include ingredient_id — strip from $defs if present.
     defs = schema.get("$defs") or schema.get("definitions") or {}
@@ -119,7 +122,6 @@ class RecipeGeneratorAgent:
             "share a name.\n\n"
             "Call output_recipe once you have the complete recipe. Do not include "
             "commentary outside the tool call.\n"
-            f"<exclusion_constraints>{exclusion_constraint}</exclusion_constraints>"
         )
         user_payload = {
             "title": request.title,
@@ -131,6 +133,7 @@ class RecipeGeneratorAgent:
         }
         user_prompt = (
             "Generate a recipe from the request below.\n"
+            f"<exclusion_constraints>{exclusion_constraint}</exclusion_constraints>\n"
             f"<request>{json.dumps(user_payload, default=str)}</request>"
         )
 
@@ -138,9 +141,11 @@ class RecipeGeneratorAgent:
             system_prompt=system_prompt,
             user_prompt=user_prompt,
             model=route_model(AgentTask.RECIPE_GENERATION),
+            user_id=user_id,
+            task=AgentTask.RECIPE_GENERATION,
         )
 
-        draft = await self._validate_nutrition(draft, system_prompt)
+        draft = await self._validate_nutrition(draft)
         draft = await self._resolve_ingredients(draft, db)
         return draft
 
@@ -151,6 +156,8 @@ class RecipeGeneratorAgent:
         user_prompt: str,
         model: str,
         trace_id: str | None = None,
+        user_id: UUID | None = None,
+        task: AgentTask | None = None,
     ) -> RecipeDraft:
         messages: list[dict[str, Any]] = [
             {"role": "user", "content": user_prompt}
@@ -159,11 +166,13 @@ class RecipeGeneratorAgent:
             message = await self._client.complete(
                 messages,
                 model=model,
-                tools=[_OUTPUT_RECIPE_TOOL],
+                tools=with_cached_last_tool([_OUTPUT_RECIPE_TOOL]),
                 tool_choice={"type": "tool", "name": "output_recipe"},
                 max_tokens=4096,
-                system=system_prompt,
+                system=cached_system_blocks(system_prompt),
                 trace_id=trace_id,
+                user_id=user_id,
+                task=None if task is None else task.value,
             )
             try:
                 return self._extract_recipe(message)
@@ -191,9 +200,7 @@ class RecipeGeneratorAgent:
                 return RecipeDraft.model_validate(block.input)
         raise ValueError("Model did not call output_recipe")
 
-    async def _validate_nutrition(
-        self, draft: RecipeDraft, system_prompt: str
-    ) -> RecipeDraft:
+    async def _validate_nutrition(self, draft: RecipeDraft) -> RecipeDraft:
         nutrition = NutritionPerServing(
             calories_kcal=draft.nutrition_per_serving.calories_kcal,
             protein_g=draft.nutrition_per_serving.protein_g,
@@ -203,28 +210,14 @@ class RecipeGeneratorAgent:
         )
         try:
             self._nutrition.check(nutrition)
-            return draft
         except NutritionOutOfRangeError as exc:
             logger.warning(
                 "nutrition_out_of_range",
                 field=exc.field,
                 value=exc.value,
             )
-            if not settings.nutrition_reestimate_on_low_confidence:
-                raise
-            reestimate_prompt = (
-                f"nutrition_per_serving.{exc.field} was estimated as {exc.value}, which "
-                "is outside a plausible range for a single serving. Re-estimate "
-                "nutrition_per_serving for this exact recipe — same ingredients and "
-                "quantities, don't change the recipe itself — and call output_recipe "
-                "again with corrected, realistic values.\n"
-                f"<previous_draft>{draft.model_dump_json()}</previous_draft>"
-            )
-            return await self._call_and_parse(
-                system_prompt=system_prompt,
-                user_prompt=reestimate_prompt,
-                model=route_model(AgentTask.RECIPE_GENERATION),
-            )
+            return draft.model_copy(update={"nutrition_flagged": True})
+        return draft
 
     async def _resolve_ingredients(
         self, draft: RecipeDraft, db: AsyncSession

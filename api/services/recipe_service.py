@@ -1,13 +1,14 @@
 from __future__ import annotations
 
+from collections.abc import Mapping
+from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from typing import Any
 from uuid import UUID
 
-from sqlalchemy import func, or_, select
-from sqlalchemy.ext.asyncio import AsyncSession
-
+import structlog
 from db.models import (
+    Ingredient,
     Recipe,
     RecipeDietCompatibility,
     RecipeImportLog,
@@ -18,14 +19,34 @@ from db.models import (
     RecipeSource,
     RecipeType,
 )
-from exceptions import NotFoundError
+from exceptions import NotFoundError, PlanGenerationFailedError
 from schemas.common import PaginatedResult
-from schemas.recipes import RecipeDraft, RecipeFilters, RecipeUpdate
+from schemas.recipes import (
+    PinnedRecipeSnapshot,
+    RecipeDraft,
+    RecipeFilters,
+    RecipeIngredientSnapshot,
+    RecipePlanSnapshot,
+    RecipeUpdate,
+)
+from sqlalchemy import func, or_, select
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from services._helpers import (
     get_owned_recipe,
     get_profile_or_404,
     resolve_or_create_ingredient,
 )
+from services.recipe_dedup import should_reuse_existing
+
+logger = structlog.get_logger(__name__)
+
+
+@dataclass(slots=True)
+class SaveGeneratedBatchResult:
+    recipes: list[Recipe]
+    id_remap: dict[UUID, UUID] = field(default_factory=dict)
+    inserted: list[Recipe] = field(default_factory=list)
 
 
 class RecipeService:
@@ -79,13 +100,87 @@ class RecipeService:
         return await self._persist_draft(user_id, draft, db)
 
     async def save_generated_batch(
-        self, user_id: UUID, drafts: list[RecipeDraft], db: AsyncSession
-    ) -> list[Recipe]:
+        self,
+        user_id: UUID,
+        drafts: list[RecipeDraft],
+        db: AsyncSession,
+        *,
+        placed_ids: set[UUID] | None = None,
+    ) -> SaveGeneratedBatchResult:
         await get_profile_or_404(user_id, db)
-        saved: list[Recipe] = []
+        library = await self._load_library_for_dedup(user_id, db)
+        recipes: list[Recipe] = []
+        inserted: list[Recipe] = []
+        id_remap: dict[UUID, UUID] = {}
         for draft in drafts:
-            saved.append(await self._persist_draft(user_id, draft, db))
-        return saved
+            if (
+                placed_ids is not None
+                and draft.id is not None
+                and draft.id not in placed_ids
+            ):
+                continue
+            existing = self._match_existing(draft, library)
+            if existing is not None:
+                if draft.id is not None and draft.id != existing.id:
+                    id_remap[draft.id] = existing.id
+                logger.info(
+                    "generated_recipe_reused",
+                    requested_id=str(draft.id) if draft.id else None,
+                    existing_id=str(existing.id),
+                    name=existing.name,
+                )
+                recipes.append(existing)
+                continue
+            recipe = await self._persist_draft(user_id, draft, db)
+            recipes.append(recipe)
+            inserted.append(recipe)
+            library.append(
+                (
+                    recipe,
+                    {ing.ingredient_name for ing in draft.ingredients},
+                )
+            )
+        return SaveGeneratedBatchResult(
+            recipes=recipes, id_remap=id_remap, inserted=inserted
+        )
+
+    async def _load_library_for_dedup(
+        self, user_id: UUID, db: AsyncSession
+    ) -> list[tuple[Recipe, set[str]]]:
+        result = await db.execute(
+            select(Recipe)
+            .where(Recipe.user_id == user_id, Recipe.deleted_at.is_(None))
+            .order_by(Recipe.created_at.asc())
+        )
+        recipes = list(result.scalars().all())
+        library: list[tuple[Recipe, set[str]]] = []
+        for recipe in recipes:
+            ing_result = await db.execute(
+                select(Ingredient.name)
+                .join(
+                    RecipeIngredient,
+                    RecipeIngredient.ingredient_id == Ingredient.id,
+                )
+                .where(RecipeIngredient.recipe_id == recipe.id)
+            )
+            names = {n for n in ing_result.scalars().all() if n}
+            library.append((recipe, names))
+        return library
+
+    @staticmethod
+    def _match_existing(
+        draft: RecipeDraft, library: list[tuple[Recipe, set[str]]]
+    ) -> Recipe | None:
+        draft_names = {ing.ingredient_name for ing in draft.ingredients}
+        for recipe, names in library:
+            if should_reuse_existing(
+                draft_name=draft.name,
+                draft_ingredients=draft_names,
+                existing_name=recipe.name,
+                existing_ingredients=names,
+            ):
+                return recipe
+        return None
 
     async def update_recipe(
         self,
@@ -128,6 +223,135 @@ class RecipeService:
     ) -> None:
         await self._upsert_nutrition(recipe_id, nutrition, db)
         await db.flush()
+
+    async def load_plan_snapshots(
+        self,
+        user_id: UUID,
+        recipe_ids: list[UUID],
+        db: AsyncSession,
+    ) -> dict[UUID, RecipePlanSnapshot]:
+        """Load recipes that have nutrition — ineligible (no row) are omitted."""
+        if not recipe_ids:
+            return {}
+        unique_ids = list(dict.fromkeys(recipe_ids))
+        recipes_result = await db.execute(
+            select(Recipe).where(
+                Recipe.id.in_(unique_ids),
+                Recipe.user_id == user_id,
+                Recipe.deleted_at.is_(None),
+            )
+        )
+        recipes = list(recipes_result.scalars().all())
+        snapshots: dict[UUID, RecipePlanSnapshot] = {}
+        for recipe in recipes:
+            nutrition = await db.get(RecipeNutrition, recipe.id)
+            if nutrition is None:
+                continue
+            meal = await db.get(RecipeMealDetails, recipe.id)
+            primary = None
+            slot_hint = None
+            if meal is not None:
+                primary = meal.primary_protein_source.value
+                if meal.meal_roles:
+                    slot_hint = meal.meal_roles[0].value
+            ing_result = await db.execute(
+                select(RecipeIngredient, Ingredient)
+                .join(Ingredient, Ingredient.id == RecipeIngredient.ingredient_id)
+                .where(RecipeIngredient.recipe_id == recipe.id)
+                .order_by(RecipeIngredient.sort_order.asc())
+            )
+            ingredients = [
+                RecipeIngredientSnapshot(name=ing.name, ingredient_id=ing.id)
+                for _row, ing in ing_result.all()
+            ]
+            snapshots[recipe.id] = RecipePlanSnapshot(
+                recipe_id=recipe.id,
+                title=recipe.name,
+                calories=float(nutrition.calories_per_serving),
+                protein_g=float(nutrition.protein_g),
+                carbs_g=float(nutrition.carbs_g),
+                fat_g=float(nutrition.fat_g),
+                fiber_g=float(nutrition.fiber_g),
+                prep_method=recipe.prep_method,
+                primary_protein=primary,
+                slot_hint=slot_hint,
+                ingredients=ingredients,
+            )
+        return snapshots
+
+    async def load_pinned_recipes(
+        self,
+        user_id: UUID,
+        ids: list[UUID],
+        db: AsyncSession,
+        *,
+        names: Mapping[UUID, str] | None = None,
+    ) -> dict[UUID, PinnedRecipeSnapshot]:
+        """Owned, non-deleted pins. Nutrition may be missing.
+
+        A missing or foreign id raises. ``names`` supplies the label for that
+        error when the row is not visible to this user.
+        """
+        if not ids:
+            return {}
+        unique_ids = list(dict.fromkeys(ids))
+        recipes_result = await db.execute(
+            select(Recipe).where(
+                Recipe.id.in_(unique_ids),
+                Recipe.user_id == user_id,
+                Recipe.deleted_at.is_(None),
+            )
+        )
+        recipes = {recipe.id: recipe for recipe in recipes_result.scalars().all()}
+        labels = names or {}
+        missing = [rid for rid in unique_ids if rid not in recipes]
+        if missing:
+            label = labels.get(missing[0], str(missing[0]))
+            raise PlanGenerationFailedError(f"Pinned recipe not found: {label}")
+
+        snapshots: dict[UUID, PinnedRecipeSnapshot] = {}
+        for recipe_id in unique_ids:
+            recipe = recipes[recipe_id]
+            nutrition = await db.get(RecipeNutrition, recipe.id)
+            meal = await db.get(RecipeMealDetails, recipe.id)
+            primary = None
+            slot_hint = None
+            if meal is not None:
+                primary = meal.primary_protein_source.value
+                if meal.meal_roles:
+                    slot_hint = meal.meal_roles[0].value
+            ing_result = await db.execute(
+                select(RecipeIngredient, Ingredient)
+                .join(Ingredient, Ingredient.id == RecipeIngredient.ingredient_id)
+                .where(RecipeIngredient.recipe_id == recipe.id)
+                .order_by(RecipeIngredient.sort_order.asc())
+            )
+            ingredients = [
+                RecipeIngredientSnapshot(name=ing.name, ingredient_id=ing.id)
+                for _row, ing in ing_result.all()
+            ]
+            calories = protein_g = carbs_g = fat_g = fiber_g = None
+            if nutrition is not None:
+                calories = float(nutrition.calories_per_serving)
+                protein_g = float(nutrition.protein_g)
+                carbs_g = float(nutrition.carbs_g)
+                fat_g = float(nutrition.fat_g)
+                fiber_g = float(nutrition.fiber_g)
+            snapshots[recipe.id] = PinnedRecipeSnapshot(
+                recipe_id=recipe.id,
+                title=recipe.name,
+                recipe_type=recipe.recipe_type,
+                ingredients=ingredients,
+                calories=calories,
+                protein_g=protein_g,
+                carbs_g=carbs_g,
+                fat_g=fat_g,
+                fiber_g=fiber_g,
+                prep_method=recipe.prep_method,
+                primary_protein=primary,
+                slot_hint=slot_hint,
+            )
+        return snapshots
 
     async def delete_recipe(
         self, recipe_id: UUID, user_id: UUID, db: AsyncSession
