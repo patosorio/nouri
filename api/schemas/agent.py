@@ -6,16 +6,16 @@ from decimal import Decimal
 from typing import Any, Literal
 from uuid import UUID
 
-from pydantic import BaseModel, Field
-
 from db.models import (
     CookingType,
     DietType,
     JuiceTime,
     PreparationType,
+    PrimaryProtein,
     RecipeUsagePolicy,
     UserTier,
 )
+from pydantic import BaseModel, Field
 
 # AI output slot vocabulary — docs/7_TECH_SPEC.md §5.4 (aligned with ERD PlanSlot).
 PlanSlotAI = Literal[
@@ -24,12 +24,13 @@ PlanSlotAI = Literal[
     "dinner",
     "snack",
     "juice",
+    "smoothie",
     "extra_morning",
     "extra_afternoon",
     "extra_evening",
 ]
 
-SSEEventType = Literal["text_delta", "tool_call", "done", "error"]
+SSEEventType = Literal["text_delta", "tool_call", "done", "error", "plan_proposal"]
 
 
 class AgentContext(BaseModel):
@@ -45,6 +46,18 @@ class AgentContext(BaseModel):
     trace_id: str | None = None
 
 
+class PlanProposal(BaseModel):
+    """Params for the generate form — chat does not enqueue generation."""
+
+    num_days: int = Field(ge=1, le=14)
+    diet_type: DietType
+    cooking_type: CookingType | None = None
+    calorie_target: int | None = None
+    recipe_usage_policy: RecipeUsagePolicy | None = None
+    include_juicing: bool = False
+    notes: str | None = None
+
+
 class SSEEvent(BaseModel):
     type: SSEEventType
     text: str | None = None
@@ -53,6 +66,7 @@ class SSEEvent(BaseModel):
     tool_use_id: str | None = None
     error: str | None = None
     code: str | None = None
+    plan_proposal: PlanProposal | None = None
 
 
 class PlanGenerationJob(BaseModel):
@@ -75,13 +89,27 @@ class PlanGenerationJob(BaseModel):
 
 
 class GeneratedPlanItemAI(BaseModel):
-    """One slot in a generated plan day — docs/7_TECH_SPEC.md §5.4."""
+    """One slot in a generated plan day — docs/7_TECH_SPEC.md §5.4.
+
+    Macro / prep / protein snapshot fields are filled by SlotAssigner after
+    the LLM call. They are stripped from the output_plan tool schema so the
+    model cannot invent them.
+    """
 
     slot_type: PlanSlotAI
     recipe_id: UUID | Literal["generate_new"]
     recipe_title: str
     servings: int = 1
     juice_time: JuiceTime | None = None
+    juice_size_ml: int | None = None
+    nutrition_unknown: bool = False
+    calories: float | None = None
+    protein_g: float | None = None
+    carbs_g: float | None = None
+    fat_g: float | None = None
+    fiber_g: float | None = None
+    prep_method: PreparationType | None = None
+    primary_protein: str | None = None
 
 
 class GeneratedPlanDayAI(BaseModel):
@@ -128,6 +156,10 @@ class GeneratedRecipeAI(BaseModel):
     ingredients: list[RecipeIngredientAI] = Field(default_factory=list)
     steps: list[RecipeStepAI] = Field(default_factory=list)
     assigned_id: UUID | None = None
+    # Required for SlotAssigner — truncated max_tokens outputs often omit this and
+    # produce an empty nutrition pool (plan_assignment_infeasible).
+    nutrition_per_serving: NutritionPerServingAI
+    primary_protein: PrimaryProtein | None = None
 
 
 class GeneratedPlanData(BaseModel):
@@ -135,6 +167,7 @@ class GeneratedPlanData(BaseModel):
 
     days: list[GeneratedPlanDayAI]
     generated_recipes: list[GeneratedRecipeAI] = Field(default_factory=list)
+    review_notes: str | None = None
 
 
 class RecipeDraft(BaseModel):
@@ -151,6 +184,7 @@ class RecipeDraft(BaseModel):
     ingredients: list[RecipeIngredientAI] = Field(default_factory=list)
     steps: list[RecipeStepAI] = Field(default_factory=list)
     nutrition_per_serving: NutritionPerServingAI
+    nutrition_flagged: bool = False
     unresolved_ingredient_names: list[str] = Field(default_factory=list)
 
 
@@ -198,7 +232,7 @@ class TriggerPlanGenerationInput(BaseModel):
     cooking_type: CookingType | None = None
     calorie_target: int | None = None
     sourcing_policy: RecipeUsagePolicy | None = None
-    include_juicing: bool = False
+    include_juicing: bool | None = None
     notes: str | None = Field(default=None, max_length=2000)
 
 
@@ -271,4 +305,3 @@ class GetShoppingListInput(BaseModel):
 class GetUserProfileInput(BaseModel):
     """No fields — user_id injected by AgentToolExecutor."""
 
-    pass

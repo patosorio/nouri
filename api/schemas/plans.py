@@ -6,11 +6,10 @@ from datetime import date as Date
 from decimal import Decimal
 from uuid import UUID
 
-from pydantic import BaseModel, Field
-
 from db.models import (
     CookingType,
     DietType,
+    JuiceTime,
     PlanItemSource,
     PlanSlot,
     PlanStatus,
@@ -18,6 +17,8 @@ from db.models import (
     RecipeType,
     RecipeUsagePolicy,
 )
+from pydantic import BaseModel, Field
+
 from schemas.recipes import RecipeDraft
 
 
@@ -27,7 +28,7 @@ class PlanGenerationParams(BaseModel):
     cooking_type: CookingType | None = None
     calorie_target: int | None = None
     sourcing_policy: RecipeUsagePolicy = RecipeUsagePolicy.BALANCED
-    include_juicing: bool = False
+    include_juicing: bool | None = None
     notes: str | None = Field(default=None, max_length=2000)
     cloned_from_plan_id: UUID | None = None
     week_start_date: Date | None = None
@@ -51,18 +52,23 @@ class GeneratedPlanItem(BaseModel):
     fat_g: Decimal | None = None
     fiber_g: Decimal | None = None
     slot_order: int = 0
+    juice_time: JuiceTime | None = None
+    juice_size_ml: int | None = None
+    nutrition_unknown: bool = False
 
 
 class GeneratedPlanDay(BaseModel):
     day_number: int = Field(ge=1, le=31)
     items: list[GeneratedPlanItem] = Field(default_factory=list)
     date: Date | None = None
+    totals_incomplete: bool = False
 
 
 class GeneratedPlanData(BaseModel):
     days: list[GeneratedPlanDay]
     generated_recipes: list[RecipeDraft] = Field(default_factory=list)
     title: str | None = None
+    review_notes: str | None = None
 
 
 class MealPlanSummary(BaseModel):

@@ -5,8 +5,6 @@ from __future__ import annotations
 from decimal import Decimal
 from uuid import UUID
 
-from pydantic import BaseModel, Field
-
 from db.models import (
     CookingType,
     DietType,
@@ -19,6 +17,7 @@ from db.models import (
     RecipeSource,
     RecipeType,
 )
+from pydantic import BaseModel, Field
 
 
 class RecipeIngredientDraft(BaseModel):
@@ -106,3 +105,41 @@ class RecipeFilters(BaseModel):
     diet_type: DietType | None = None
     offset: int = 0
     limit: int = Field(default=30, ge=1, le=100)
+
+
+class RecipeIngredientSnapshot(BaseModel):
+    name: str
+    ingredient_id: UUID | None = None
+
+
+class PinnedRecipeSnapshot(BaseModel):
+    """Saved recipe pinned into a plan. Nutrition may be missing."""
+
+    recipe_id: UUID
+    title: str
+    recipe_type: RecipeType
+    ingredients: list[RecipeIngredientSnapshot] = Field(default_factory=list)
+    calories: float | None = None
+    protein_g: float | None = None
+    carbs_g: float | None = None
+    fat_g: float | None = None
+    fiber_g: float | None = None
+    prep_method: PreparationType | None = None
+    primary_protein: str | None = None
+    slot_hint: str | None = None
+
+
+class RecipePlanSnapshot(BaseModel):
+    """Nutrition + prep view for slot assignment (saved recipes)."""
+
+    recipe_id: UUID
+    title: str
+    calories: float
+    protein_g: float
+    carbs_g: float
+    fat_g: float
+    fiber_g: float
+    prep_method: PreparationType | None = None
+    primary_protein: str | None = None
+    slot_hint: str | None = None
+    ingredients: list[RecipeIngredientSnapshot] = Field(default_factory=list)

@@ -7,8 +7,6 @@ from decimal import Decimal
 from typing import Any
 from uuid import UUID
 
-from pydantic import BaseModel, Field
-
 from db.models import (
     CookingType,
     DietType,
@@ -17,6 +15,8 @@ from db.models import (
     RecipeType,
     RecipeUsagePolicy,
 )
+from pydantic import BaseModel, Field
+
 from schemas.profile import ProfileCreate, ProfileUpdate
 from schemas.recipes import RecipeDraft, RecipeUpdate
 
@@ -36,6 +36,8 @@ class PlanGenerationRequest(BaseModel):
     include_juicing: bool = False
     notes: str | None = Field(default=None, max_length=2000)
     cloned_from_plan_id: UUID | None = None
+    week_start_date: date | None = None
+    conversation_id: UUID | None = None
 
 
 class PlanStatusUpdate(BaseModel):

@@ -148,6 +148,7 @@ class PlanSlot(str, enum.Enum):
     DINNER = "dinner"
     SNACK = "snack"
     JUICE = "juice"
+    SMOOTHIE = "smoothie"
     EXTRA_MORNING = "extra_morning"
     EXTRA_AFTERNOON = "extra_afternoon"
     EXTRA_EVENING = "extra_evening"
@@ -210,7 +211,7 @@ class AuthUser(Base):
     """Maps to Supabase auth.users. Local Docker creates a stub table for FKs."""
 
     __tablename__ = "users"
-    __table_args__ = {"schema": "auth"}
+    __table_args__ = {"schema": "auth"}  # noqa: RUF012
 
     id: Mapped[UUID] = mapped_column(
         primary_key=True, server_default=text("gen_random_uuid()")
@@ -262,6 +263,10 @@ class UserProfile(Base):
         _pg_enum(UserTier, "user_tier_enum"),
         nullable=False,
         server_default=text("'free'"),
+    )
+    # Watermark for Stripe subscription events (migration 005). Not in the ERD.
+    stripe_subscription_event_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True)
     )
     generation_credits_remaining: Mapped[int] = mapped_column(
         Integer, nullable=False, server_default=text("10")
@@ -643,6 +648,9 @@ class PlanDay(Base):
     carbs_g_target: Mapped[Decimal | None] = mapped_column(Numeric)
     fat_g_target: Mapped[Decimal | None] = mapped_column(Numeric)
     fiber_g_target: Mapped[Decimal | None] = mapped_column(Numeric)
+    totals_incomplete: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, server_default=text("false")
+    )
 
 
 class PlanItem(Base):
@@ -651,6 +659,15 @@ class PlanItem(Base):
         CheckConstraint(
             "color IS NULL OR color ~ '^#[0-9a-fA-F]{6}$'",
             name="ck_plan_items_color_hex",
+        ),
+        CheckConstraint(
+            "(juice_time IS NULL AND juice_size_ml IS NULL) "
+            "OR slot::text IN ('juice', 'smoothie')",
+            name="ck_plan_items_juice_fields",
+        ),
+        CheckConstraint(
+            "juice_size_ml > 0 AND juice_size_ml <= 1000",
+            name="plan_items_juice_size_ml_check",
         ),
     )
 
@@ -693,6 +710,13 @@ class PlanItem(Base):
         Boolean, nullable=False, server_default=text("false")
     )
     notes: Mapped[str | None] = mapped_column(Text)
+    juice_time: Mapped[JuiceTime | None] = mapped_column(
+        _pg_enum(JuiceTime, "juice_time_enum")
+    )
+    juice_size_ml: Mapped[int | None] = mapped_column(Integer)
+    nutrition_unknown: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, server_default=text("false")
+    )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, server_default=text("now()")
     )
@@ -819,6 +843,12 @@ class JobQueue(Base):
         JSONB, nullable=False, server_default=text("'{}'::jsonb")
     )
     result: Mapped[dict[str, object] | None] = mapped_column(JSONB)
+    # Parsed output_plan tool input, committed before any plan writes so a
+    # later attempt can rebuild the plan without another model call.
+    llm_output: Mapped[dict[str, object] | None] = mapped_column(JSONB)
+    llm_output_saved_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True)
+    )
     error_message: Mapped[str | None] = mapped_column(Text)
     attempts: Mapped[int] = mapped_column(
         Integer, nullable=False, server_default=text("0")
@@ -887,5 +917,59 @@ class BehaviorSignal(Base):
     )
     notes: Mapped[str | None] = mapped_column(Text)
     created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=text("now()")
+    )
+
+
+class LlmCall(Base):
+    __tablename__ = "llm_calls"
+    __table_args__ = (
+        CheckConstraint(
+            "outcome IN ("
+            "'ok', 'http_error', 'timeout', 'parse_error', 'refused_budget'"
+            ")",
+            name="llm_calls_outcome_check",
+        ),
+    )
+
+    id: Mapped[UUID] = mapped_column(
+        primary_key=True, server_default=text("gen_random_uuid()")
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=text("now()")
+    )
+    user_id: Mapped[UUID | None] = mapped_column(nullable=True)
+    job_id: Mapped[UUID | None] = mapped_column(
+        ForeignKey("job_queue.id", ondelete="SET NULL")
+    )
+    task: Mapped[str] = mapped_column(Text, nullable=False)
+    model: Mapped[str] = mapped_column(Text, nullable=False)
+    attempt: Mapped[int] = mapped_column(Integer, nullable=False)
+    outcome: Mapped[str] = mapped_column(Text, nullable=False)
+    http_status: Mapped[int | None] = mapped_column(Integer)
+    latency_ms: Mapped[int] = mapped_column(Integer, nullable=False)
+    input_tokens: Mapped[int] = mapped_column(
+        Integer, nullable=False, server_default=text("0")
+    )
+    output_tokens: Mapped[int] = mapped_column(
+        Integer, nullable=False, server_default=text("0")
+    )
+    cache_creation_input_tokens: Mapped[int] = mapped_column(
+        Integer, nullable=False, server_default=text("0")
+    )
+    cache_read_input_tokens: Mapped[int] = mapped_column(
+        Integer, nullable=False, server_default=text("0")
+    )
+    estimated_cost_usd: Mapped[Decimal | None] = mapped_column(Numeric)
+
+
+class ProcessedStripeEvent(Base):
+    """Stripe event ids already accepted. Service role only; RLS with no policies."""
+
+    __tablename__ = "processed_stripe_events"
+
+    event_id: Mapped[str] = mapped_column(Text, primary_key=True)
+    type: Mapped[str] = mapped_column(Text, nullable=False)
+    received_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, server_default=text("now()")
     )
