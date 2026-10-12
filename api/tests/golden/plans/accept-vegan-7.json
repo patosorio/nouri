@@ -1,0 +1,950 @@
+{
+  "name": "accept-vegan-7",
+  "params": {
+    "diet": "vegan",
+    "days": 7,
+    "include_juicing": false,
+    "juicing_config": [],
+    "pins": [],
+    "targets": {
+      "calorie_target": 870
+    }
+  },
+  "skeleton_inputs": {
+    "duration_days": 7,
+    "include_juicing": false,
+    "juicing_config": [],
+    "pins": []
+  },
+  "attempts": [
+    {
+      "days": [
+        {
+          "day_number": 1,
+          "items": [
+            {
+              "slot_type": "breakfast",
+              "recipe_id": "generate_new",
+              "recipe_title": "D1 breakfast",
+              "servings": 1
+            },
+            {
+              "slot_type": "lunch",
+              "recipe_id": "generate_new",
+              "recipe_title": "D1 lunch",
+              "servings": 1
+            },
+            {
+              "slot_type": "dinner",
+              "recipe_id": "generate_new",
+              "recipe_title": "D1 dinner",
+              "servings": 1
+            }
+          ]
+        },
+        {
+          "day_number": 2,
+          "items": [
+            {
+              "slot_type": "breakfast",
+              "recipe_id": "generate_new",
+              "recipe_title": "D2 breakfast",
+              "servings": 1
+            },
+            {
+              "slot_type": "lunch",
+              "recipe_id": "generate_new",
+              "recipe_title": "D2 lunch",
+              "servings": 1
+            },
+            {
+              "slot_type": "dinner",
+              "recipe_id": "generate_new",
+              "recipe_title": "D2 dinner",
+              "servings": 1
+            }
+          ]
+        },
+        {
+          "day_number": 3,
+          "items": [
+            {
+              "slot_type": "breakfast",
+              "recipe_id": "generate_new",
+              "recipe_title": "D3 breakfast",
+              "servings": 1
+            },
+            {
+              "slot_type": "lunch",
+              "recipe_id": "generate_new",
+              "recipe_title": "D3 lunch",
+              "servings": 1
+            },
+            {
+              "slot_type": "dinner",
+              "recipe_id": "generate_new",
+              "recipe_title": "D3 dinner",
+              "servings": 1
+            }
+          ]
+        },
+        {
+          "day_number": 4,
+          "items": [
+            {
+              "slot_type": "breakfast",
+              "recipe_id": "generate_new",
+              "recipe_title": "D4 breakfast",
+              "servings": 1
+            },
+            {
+              "slot_type": "lunch",
+              "recipe_id": "generate_new",
+              "recipe_title": "D4 lunch",
+              "servings": 1
+            },
+            {
+              "slot_type": "dinner",
+              "recipe_id": "generate_new",
+              "recipe_title": "D4 dinner",
+              "servings": 1
+            }
+          ]
+        },
+        {
+          "day_number": 5,
+          "items": [
+            {
+              "slot_type": "breakfast",
+              "recipe_id": "generate_new",
+              "recipe_title": "D5 breakfast",
+              "servings": 1
+            },
+            {
+              "slot_type": "lunch",
+              "recipe_id": "generate_new",
+              "recipe_title": "D5 lunch",
+              "servings": 1
+            },
+            {
+              "slot_type": "dinner",
+              "recipe_id": "generate_new",
+              "recipe_title": "D5 dinner",
+              "servings": 1
+            }
+          ]
+        },
+        {
+          "day_number": 6,
+          "items": [
+            {
+              "slot_type": "breakfast",
+              "recipe_id": "generate_new",
+              "recipe_title": "D6 breakfast",
+              "servings": 1
+            },
+            {
+              "slot_type": "lunch",
+              "recipe_id": "generate_new",
+              "recipe_title": "D6 lunch",
+              "servings": 1
+            },
+            {
+              "slot_type": "dinner",
+              "recipe_id": "generate_new",
+              "recipe_title": "D6 dinner",
+              "servings": 1
+            }
+          ]
+        },
+        {
+          "day_number": 7,
+          "items": [
+            {
+              "slot_type": "breakfast",
+              "recipe_id": "generate_new",
+              "recipe_title": "D7 breakfast",
+              "servings": 1
+            },
+            {
+              "slot_type": "lunch",
+              "recipe_id": "generate_new",
+              "recipe_title": "D7 lunch",
+              "servings": 1
+            },
+            {
+              "slot_type": "dinner",
+              "recipe_id": "generate_new",
+              "recipe_title": "D7 dinner",
+              "servings": 1
+            }
+          ]
+        }
+      ],
+      "generated_recipes": [
+        {
+          "title": "D1 breakfast",
+          "slot_type": "breakfast",
+          "diet_type": "vegan",
+          "prep_type": "steamed",
+          "servings": 1,
+          "primary_protein": "none",
+          "ingredients": [
+            {
+              "ingredient_name": "D1 breakfast",
+              "quantity": 1,
+              "unit": "cup"
+            }
+          ],
+          "steps": [
+            {
+              "step_number": 1,
+              "instruction": "Cook."
+            }
+          ],
+          "nutrition_per_serving": {
+            "calories_kcal": 290.0,
+            "protein_g": 20.0,
+            "fat_g": 10.0,
+            "carbohydrates_g": 30.0,
+            "fiber_g": 5.0
+          }
+        },
+        {
+          "title": "D1 lunch",
+          "slot_type": "lunch",
+          "diet_type": "vegan",
+          "prep_type": "steamed",
+          "servings": 1,
+          "primary_protein": "none",
+          "ingredients": [
+            {
+              "ingredient_name": "D1 lunch",
+              "quantity": 1,
+              "unit": "cup"
+            }
+          ],
+          "steps": [
+            {
+              "step_number": 1,
+              "instruction": "Cook."
+            }
+          ],
+          "nutrition_per_serving": {
+            "calories_kcal": 290.0,
+            "protein_g": 20.0,
+            "fat_g": 10.0,
+            "carbohydrates_g": 30.0,
+            "fiber_g": 5.0
+          }
+        },
+        {
+          "title": "D1 dinner",
+          "slot_type": "dinner",
+          "diet_type": "vegan",
+          "prep_type": "steamed",
+          "servings": 1,
+          "primary_protein": "none",
+          "ingredients": [
+            {
+              "ingredient_name": "D1 dinner",
+              "quantity": 1,
+              "unit": "cup"
+            }
+          ],
+          "steps": [
+            {
+              "step_number": 1,
+              "instruction": "Cook."
+            }
+          ],
+          "nutrition_per_serving": {
+            "calories_kcal": 290.0,
+            "protein_g": 20.0,
+            "fat_g": 10.0,
+            "carbohydrates_g": 30.0,
+            "fiber_g": 5.0
+          }
+        },
+        {
+          "title": "D2 breakfast",
+          "slot_type": "breakfast",
+          "diet_type": "vegan",
+          "prep_type": "steamed",
+          "servings": 1,
+          "primary_protein": "none",
+          "ingredients": [
+            {
+              "ingredient_name": "D2 breakfast",
+              "quantity": 1,
+              "unit": "cup"
+            }
+          ],
+          "steps": [
+            {
+              "step_number": 1,
+              "instruction": "Cook."
+            }
+          ],
+          "nutrition_per_serving": {
+            "calories_kcal": 290.0,
+            "protein_g": 20.0,
+            "fat_g": 10.0,
+            "carbohydrates_g": 30.0,
+            "fiber_g": 5.0
+          }
+        },
+        {
+          "title": "D2 lunch",
+          "slot_type": "lunch",
+          "diet_type": "vegan",
+          "prep_type": "steamed",
+          "servings": 1,
+          "primary_protein": "none",
+          "ingredients": [
+            {
+              "ingredient_name": "D2 lunch",
+              "quantity": 1,
+              "unit": "cup"
+            }
+          ],
+          "steps": [
+            {
+              "step_number": 1,
+              "instruction": "Cook."
+            }
+          ],
+          "nutrition_per_serving": {
+            "calories_kcal": 290.0,
+            "protein_g": 20.0,
+            "fat_g": 10.0,
+            "carbohydrates_g": 30.0,
+            "fiber_g": 5.0
+          }
+        },
+        {
+          "title": "D2 dinner",
+          "slot_type": "dinner",
+          "diet_type": "vegan",
+          "prep_type": "steamed",
+          "servings": 1,
+          "primary_protein": "none",
+          "ingredients": [
+            {
+              "ingredient_name": "D2 dinner",
+              "quantity": 1,
+              "unit": "cup"
+            }
+          ],
+          "steps": [
+            {
+              "step_number": 1,
+              "instruction": "Cook."
+            }
+          ],
+          "nutrition_per_serving": {
+            "calories_kcal": 290.0,
+            "protein_g": 20.0,
+            "fat_g": 10.0,
+            "carbohydrates_g": 30.0,
+            "fiber_g": 5.0
+          }
+        },
+        {
+          "title": "D3 breakfast",
+          "slot_type": "breakfast",
+          "diet_type": "vegan",
+          "prep_type": "steamed",
+          "servings": 1,
+          "primary_protein": "none",
+          "ingredients": [
+            {
+              "ingredient_name": "D3 breakfast",
+              "quantity": 1,
+              "unit": "cup"
+            }
+          ],
+          "steps": [
+            {
+              "step_number": 1,
+              "instruction": "Cook."
+            }
+          ],
+          "nutrition_per_serving": {
+            "calories_kcal": 290.0,
+            "protein_g": 20.0,
+            "fat_g": 10.0,
+            "carbohydrates_g": 30.0,
+            "fiber_g": 5.0
+          }
+        },
+        {
+          "title": "D3 lunch",
+          "slot_type": "lunch",
+          "diet_type": "vegan",
+          "prep_type": "steamed",
+          "servings": 1,
+          "primary_protein": "none",
+          "ingredients": [
+            {
+              "ingredient_name": "D3 lunch",
+              "quantity": 1,
+              "unit": "cup"
+            }
+          ],
+          "steps": [
+            {
+              "step_number": 1,
+              "instruction": "Cook."
+            }
+          ],
+          "nutrition_per_serving": {
+            "calories_kcal": 290.0,
+            "protein_g": 20.0,
+            "fat_g": 10.0,
+            "carbohydrates_g": 30.0,
+            "fiber_g": 5.0
+          }
+        },
+        {
+          "title": "D3 dinner",
+          "slot_type": "dinner",
+          "diet_type": "vegan",
+          "prep_type": "steamed",
+          "servings": 1,
+          "primary_protein": "none",
+          "ingredients": [
+            {
+              "ingredient_name": "D3 dinner",
+              "quantity": 1,
+              "unit": "cup"
+            }
+          ],
+          "steps": [
+            {
+              "step_number": 1,
+              "instruction": "Cook."
+            }
+          ],
+          "nutrition_per_serving": {
+            "calories_kcal": 290.0,
+            "protein_g": 20.0,
+            "fat_g": 10.0,
+            "carbohydrates_g": 30.0,
+            "fiber_g": 5.0
+          }
+        },
+        {
+          "title": "D4 breakfast",
+          "slot_type": "breakfast",
+          "diet_type": "vegan",
+          "prep_type": "steamed",
+          "servings": 1,
+          "primary_protein": "none",
+          "ingredients": [
+            {
+              "ingredient_name": "D4 breakfast",
+              "quantity": 1,
+              "unit": "cup"
+            }
+          ],
+          "steps": [
+            {
+              "step_number": 1,
+              "instruction": "Cook."
+            }
+          ],
+          "nutrition_per_serving": {
+            "calories_kcal": 290.0,
+            "protein_g": 20.0,
+            "fat_g": 10.0,
+            "carbohydrates_g": 30.0,
+            "fiber_g": 5.0
+          }
+        },
+        {
+          "title": "D4 lunch",
+          "slot_type": "lunch",
+          "diet_type": "vegan",
+          "prep_type": "steamed",
+          "servings": 1,
+          "primary_protein": "none",
+          "ingredients": [
+            {
+              "ingredient_name": "D4 lunch",
+              "quantity": 1,
+              "unit": "cup"
+            }
+          ],
+          "steps": [
+            {
+              "step_number": 1,
+              "instruction": "Cook."
+            }
+          ],
+          "nutrition_per_serving": {
+            "calories_kcal": 290.0,
+            "protein_g": 20.0,
+            "fat_g": 10.0,
+            "carbohydrates_g": 30.0,
+            "fiber_g": 5.0
+          }
+        },
+        {
+          "title": "D4 dinner",
+          "slot_type": "dinner",
+          "diet_type": "vegan",
+          "prep_type": "steamed",
+          "servings": 1,
+          "primary_protein": "none",
+          "ingredients": [
+            {
+              "ingredient_name": "D4 dinner",
+              "quantity": 1,
+              "unit": "cup"
+            }
+          ],
+          "steps": [
+            {
+              "step_number": 1,
+              "instruction": "Cook."
+            }
+          ],
+          "nutrition_per_serving": {
+            "calories_kcal": 290.0,
+            "protein_g": 20.0,
+            "fat_g": 10.0,
+            "carbohydrates_g": 30.0,
+            "fiber_g": 5.0
+          }
+        },
+        {
+          "title": "D5 breakfast",
+          "slot_type": "breakfast",
+          "diet_type": "vegan",
+          "prep_type": "steamed",
+          "servings": 1,
+          "primary_protein": "none",
+          "ingredients": [
+            {
+              "ingredient_name": "D5 breakfast",
+              "quantity": 1,
+              "unit": "cup"
+            }
+          ],
+          "steps": [
+            {
+              "step_number": 1,
+              "instruction": "Cook."
+            }
+          ],
+          "nutrition_per_serving": {
+            "calories_kcal": 290.0,
+            "protein_g": 20.0,
+            "fat_g": 10.0,
+            "carbohydrates_g": 30.0,
+            "fiber_g": 5.0
+          }
+        },
+        {
+          "title": "D5 lunch",
+          "slot_type": "lunch",
+          "diet_type": "vegan",
+          "prep_type": "steamed",
+          "servings": 1,
+          "primary_protein": "none",
+          "ingredients": [
+            {
+              "ingredient_name": "D5 lunch",
+              "quantity": 1,
+              "unit": "cup"
+            }
+          ],
+          "steps": [
+            {
+              "step_number": 1,
+              "instruction": "Cook."
+            }
+          ],
+          "nutrition_per_serving": {
+            "calories_kcal": 290.0,
+            "protein_g": 20.0,
+            "fat_g": 10.0,
+            "carbohydrates_g": 30.0,
+            "fiber_g": 5.0
+          }
+        },
+        {
+          "title": "D5 dinner",
+          "slot_type": "dinner",
+          "diet_type": "vegan",
+          "prep_type": "steamed",
+          "servings": 1,
+          "primary_protein": "none",
+          "ingredients": [
+            {
+              "ingredient_name": "D5 dinner",
+              "quantity": 1,
+              "unit": "cup"
+            }
+          ],
+          "steps": [
+            {
+              "step_number": 1,
+              "instruction": "Cook."
+            }
+          ],
+          "nutrition_per_serving": {
+            "calories_kcal": 290.0,
+            "protein_g": 20.0,
+            "fat_g": 10.0,
+            "carbohydrates_g": 30.0,
+            "fiber_g": 5.0
+          }
+        },
+        {
+          "title": "D6 breakfast",
+          "slot_type": "breakfast",
+          "diet_type": "vegan",
+          "prep_type": "steamed",
+          "servings": 1,
+          "primary_protein": "none",
+          "ingredients": [
+            {
+              "ingredient_name": "D6 breakfast",
+              "quantity": 1,
+              "unit": "cup"
+            }
+          ],
+          "steps": [
+            {
+              "step_number": 1,
+              "instruction": "Cook."
+            }
+          ],
+          "nutrition_per_serving": {
+            "calories_kcal": 290.0,
+            "protein_g": 20.0,
+            "fat_g": 10.0,
+            "carbohydrates_g": 30.0,
+            "fiber_g": 5.0
+          }
+        },
+        {
+          "title": "D6 lunch",
+          "slot_type": "lunch",
+          "diet_type": "vegan",
+          "prep_type": "steamed",
+          "servings": 1,
+          "primary_protein": "none",
+          "ingredients": [
+            {
+              "ingredient_name": "D6 lunch",
+              "quantity": 1,
+              "unit": "cup"
+            }
+          ],
+          "steps": [
+            {
+              "step_number": 1,
+              "instruction": "Cook."
+            }
+          ],
+          "nutrition_per_serving": {
+            "calories_kcal": 290.0,
+            "protein_g": 20.0,
+            "fat_g": 10.0,
+            "carbohydrates_g": 30.0,
+            "fiber_g": 5.0
+          }
+        },
+        {
+          "title": "D6 dinner",
+          "slot_type": "dinner",
+          "diet_type": "vegan",
+          "prep_type": "steamed",
+          "servings": 1,
+          "primary_protein": "none",
+          "ingredients": [
+            {
+              "ingredient_name": "D6 dinner",
+              "quantity": 1,
+              "unit": "cup"
+            }
+          ],
+          "steps": [
+            {
+              "step_number": 1,
+              "instruction": "Cook."
+            }
+          ],
+          "nutrition_per_serving": {
+            "calories_kcal": 290.0,
+            "protein_g": 20.0,
+            "fat_g": 10.0,
+            "carbohydrates_g": 30.0,
+            "fiber_g": 5.0
+          }
+        },
+        {
+          "title": "D7 breakfast",
+          "slot_type": "breakfast",
+          "diet_type": "vegan",
+          "prep_type": "steamed",
+          "servings": 1,
+          "primary_protein": "none",
+          "ingredients": [
+            {
+              "ingredient_name": "D7 breakfast",
+              "quantity": 1,
+              "unit": "cup"
+            }
+          ],
+          "steps": [
+            {
+              "step_number": 1,
+              "instruction": "Cook."
+            }
+          ],
+          "nutrition_per_serving": {
+            "calories_kcal": 290.0,
+            "protein_g": 20.0,
+            "fat_g": 10.0,
+            "carbohydrates_g": 30.0,
+            "fiber_g": 5.0
+          }
+        },
+        {
+          "title": "D7 lunch",
+          "slot_type": "lunch",
+          "diet_type": "vegan",
+          "prep_type": "steamed",
+          "servings": 1,
+          "primary_protein": "none",
+          "ingredients": [
+            {
+              "ingredient_name": "D7 lunch",
+              "quantity": 1,
+              "unit": "cup"
+            }
+          ],
+          "steps": [
+            {
+              "step_number": 1,
+              "instruction": "Cook."
+            }
+          ],
+          "nutrition_per_serving": {
+            "calories_kcal": 290.0,
+            "protein_g": 20.0,
+            "fat_g": 10.0,
+            "carbohydrates_g": 30.0,
+            "fiber_g": 5.0
+          }
+        },
+        {
+          "title": "D7 dinner",
+          "slot_type": "dinner",
+          "diet_type": "vegan",
+          "prep_type": "steamed",
+          "servings": 1,
+          "primary_protein": "none",
+          "ingredients": [
+            {
+              "ingredient_name": "D7 dinner",
+              "quantity": 1,
+              "unit": "cup"
+            }
+          ],
+          "steps": [
+            {
+              "step_number": 1,
+              "instruction": "Cook."
+            }
+          ],
+          "nutrition_per_serving": {
+            "calories_kcal": 290.0,
+            "protein_g": 20.0,
+            "fat_g": 10.0,
+            "carbohydrates_g": 30.0,
+            "fiber_g": 5.0
+          }
+        }
+      ]
+    }
+  ],
+  "verdict": "accept",
+  "error": null,
+  "flag": null,
+  "expected_calls": 1,
+  "layout": [
+    {
+      "day": 1,
+      "slot": "breakfast",
+      "juice_time": null,
+      "juice_size_ml": null,
+      "recipe": "D1 breakfast",
+      "recipe_type": "meal"
+    },
+    {
+      "day": 1,
+      "slot": "lunch",
+      "juice_time": null,
+      "juice_size_ml": null,
+      "recipe": "D1 lunch",
+      "recipe_type": "meal"
+    },
+    {
+      "day": 1,
+      "slot": "dinner",
+      "juice_time": null,
+      "juice_size_ml": null,
+      "recipe": "D1 dinner",
+      "recipe_type": "meal"
+    },
+    {
+      "day": 2,
+      "slot": "breakfast",
+      "juice_time": null,
+      "juice_size_ml": null,
+      "recipe": "D2 breakfast",
+      "recipe_type": "meal"
+    },
+    {
+      "day": 2,
+      "slot": "lunch",
+      "juice_time": null,
+      "juice_size_ml": null,
+      "recipe": "D2 lunch",
+      "recipe_type": "meal"
+    },
+    {
+      "day": 2,
+      "slot": "dinner",
+      "juice_time": null,
+      "juice_size_ml": null,
+      "recipe": "D2 dinner",
+      "recipe_type": "meal"
+    },
+    {
+      "day": 3,
+      "slot": "breakfast",
+      "juice_time": null,
+      "juice_size_ml": null,
+      "recipe": "D3 breakfast",
+      "recipe_type": "meal"
+    },
+    {
+      "day": 3,
+      "slot": "lunch",
+      "juice_time": null,
+      "juice_size_ml": null,
+      "recipe": "D3 lunch",
+      "recipe_type": "meal"
+    },
+    {
+      "day": 3,
+      "slot": "dinner",
+      "juice_time": null,
+      "juice_size_ml": null,
+      "recipe": "D3 dinner",
+      "recipe_type": "meal"
+    },
+    {
+      "day": 4,
+      "slot": "breakfast",
+      "juice_time": null,
+      "juice_size_ml": null,
+      "recipe": "D4 breakfast",
+      "recipe_type": "meal"
+    },
+    {
+      "day": 4,
+      "slot": "lunch",
+      "juice_time": null,
+      "juice_size_ml": null,
+      "recipe": "D4 lunch",
+      "recipe_type": "meal"
+    },
+    {
+      "day": 4,
+      "slot": "dinner",
+      "juice_time": null,
+      "juice_size_ml": null,
+      "recipe": "D4 dinner",
+      "recipe_type": "meal"
+    },
+    {
+      "day": 5,
+      "slot": "breakfast",
+      "juice_time": null,
+      "juice_size_ml": null,
+      "recipe": "D5 breakfast",
+      "recipe_type": "meal"
+    },
+    {
+      "day": 5,
+      "slot": "lunch",
+      "juice_time": null,
+      "juice_size_ml": null,
+      "recipe": "D5 lunch",
+      "recipe_type": "meal"
+    },
+    {
+      "day": 5,
+      "slot": "dinner",
+      "juice_time": null,
+      "juice_size_ml": null,
+      "recipe": "D5 dinner",
+      "recipe_type": "meal"
+    },
+    {
+      "day": 6,
+      "slot": "breakfast",
+      "juice_time": null,
+      "juice_size_ml": null,
+      "recipe": "D6 breakfast",
+      "recipe_type": "meal"
+    },
+    {
+      "day": 6,
+      "slot": "lunch",
+      "juice_time": null,
+      "juice_size_ml": null,
+      "recipe": "D6 lunch",
+      "recipe_type": "meal"
+    },
+    {
+      "day": 6,
+      "slot": "dinner",
+      "juice_time": null,
+      "juice_size_ml": null,
+      "recipe": "D6 dinner",
+      "recipe_type": "meal"
+    },
+    {
+      "day": 7,
+      "slot": "breakfast",
+      "juice_time": null,
+      "juice_size_ml": null,
+      "recipe": "D7 breakfast",
+      "recipe_type": "meal"
+    },
+    {
+      "day": 7,
+      "slot": "lunch",
+      "juice_time": null,
+      "juice_size_ml": null,
+      "recipe": "D7 lunch",
+      "recipe_type": "meal"
+    },
+    {
+      "day": 7,
+      "slot": "dinner",
+      "juice_time": null,
+      "juice_size_ml": null,
+      "recipe": "D7 dinner",
+      "recipe_type": "meal"
+    }
+  ]
+}

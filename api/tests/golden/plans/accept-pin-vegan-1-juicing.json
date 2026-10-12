@@ -1,0 +1,260 @@
+{
+  "name": "accept-pin-vegan-1-juicing",
+  "params": {
+    "diet": "vegan",
+    "days": 1,
+    "include_juicing": true,
+    "juicing_config": [
+      {
+        "time_of_day": "morning",
+        "size_ml": 500,
+        "slot_order": 0
+      },
+      {
+        "time_of_day": "pre_lunch",
+        "size_ml": 250,
+        "slot_order": 1
+      }
+    ],
+    "pins": [
+      {
+        "day": 1,
+        "slot": "breakfast",
+        "recipe_id": "11111111-1111-4111-8111-111111111111",
+        "title": "Pinned oats",
+        "recipe_type": "meal"
+      }
+    ],
+    "targets": {
+      "calorie_target": 1450
+    }
+  },
+  "skeleton_inputs": {
+    "duration_days": 1,
+    "include_juicing": true,
+    "juicing_config": [
+      {
+        "time_of_day": "morning",
+        "size_ml": 500,
+        "slot_order": 0
+      },
+      {
+        "time_of_day": "pre_lunch",
+        "size_ml": 250,
+        "slot_order": 1
+      }
+    ],
+    "pins": [
+      {
+        "day": 1,
+        "slot": "breakfast",
+        "recipe_id": "11111111-1111-4111-8111-111111111111",
+        "title": "Pinned oats",
+        "recipe_type": "meal"
+      }
+    ]
+  },
+  "attempts": [
+    {
+      "days": [
+        {
+          "day_number": 1,
+          "items": [
+            {
+              "slot_type": "breakfast",
+              "recipe_id": "R1",
+              "recipe_title": "Pinned oats",
+              "servings": 1
+            },
+            {
+              "slot_type": "lunch",
+              "recipe_id": "generate_new",
+              "recipe_title": "D1 lunch",
+              "servings": 1
+            },
+            {
+              "slot_type": "dinner",
+              "recipe_id": "generate_new",
+              "recipe_title": "D1 dinner",
+              "servings": 1
+            },
+            {
+              "slot_type": "juice",
+              "recipe_id": "generate_new",
+              "recipe_title": "Green",
+              "servings": 1,
+              "juice_time": "morning"
+            },
+            {
+              "slot_type": "juice",
+              "recipe_id": "generate_new",
+              "recipe_title": "Ginger",
+              "servings": 1,
+              "juice_time": "pre_lunch"
+            }
+          ]
+        }
+      ],
+      "generated_recipes": [
+        {
+          "title": "D1 lunch",
+          "slot_type": "lunch",
+          "diet_type": "vegan",
+          "prep_type": "steamed",
+          "servings": 1,
+          "primary_protein": "none",
+          "ingredients": [
+            {
+              "ingredient_name": "D1 lunch",
+              "quantity": 1,
+              "unit": "cup"
+            }
+          ],
+          "steps": [
+            {
+              "step_number": 1,
+              "instruction": "Cook."
+            }
+          ],
+          "nutrition_per_serving": {
+            "calories_kcal": 290.0,
+            "protein_g": 20.0,
+            "fat_g": 10.0,
+            "carbohydrates_g": 30.0,
+            "fiber_g": 5.0
+          }
+        },
+        {
+          "title": "D1 dinner",
+          "slot_type": "dinner",
+          "diet_type": "vegan",
+          "prep_type": "steamed",
+          "servings": 1,
+          "primary_protein": "none",
+          "ingredients": [
+            {
+              "ingredient_name": "D1 dinner",
+              "quantity": 1,
+              "unit": "cup"
+            }
+          ],
+          "steps": [
+            {
+              "step_number": 1,
+              "instruction": "Cook."
+            }
+          ],
+          "nutrition_per_serving": {
+            "calories_kcal": 290.0,
+            "protein_g": 20.0,
+            "fat_g": 10.0,
+            "carbohydrates_g": 30.0,
+            "fiber_g": 5.0
+          }
+        },
+        {
+          "title": "Green",
+          "slot_type": "juice",
+          "diet_type": "vegan",
+          "prep_type": "juiced",
+          "servings": 1,
+          "primary_protein": "none",
+          "ingredients": [
+            {
+              "ingredient_name": "Green",
+              "quantity": 1,
+              "unit": "cup"
+            }
+          ],
+          "steps": [
+            {
+              "step_number": 1,
+              "instruction": "Cook."
+            }
+          ],
+          "nutrition_per_serving": {
+            "calories_kcal": 290.0,
+            "protein_g": 20.0,
+            "fat_g": 10.0,
+            "carbohydrates_g": 30.0,
+            "fiber_g": 5.0
+          }
+        },
+        {
+          "title": "Ginger",
+          "slot_type": "juice",
+          "diet_type": "vegan",
+          "prep_type": "juiced",
+          "servings": 1,
+          "primary_protein": "none",
+          "ingredients": [
+            {
+              "ingredient_name": "Ginger",
+              "quantity": 1,
+              "unit": "cup"
+            }
+          ],
+          "steps": [
+            {
+              "step_number": 1,
+              "instruction": "Cook."
+            }
+          ],
+          "nutrition_per_serving": {
+            "calories_kcal": 290.0,
+            "protein_g": 20.0,
+            "fat_g": 10.0,
+            "carbohydrates_g": 30.0,
+            "fiber_g": 5.0
+          }
+        }
+      ]
+    }
+  ],
+  "verdict": "accept",
+  "error": null,
+  "flag": null,
+  "expected_calls": 1,
+  "layout": [
+    {
+      "day": 1,
+      "slot": "breakfast",
+      "juice_time": null,
+      "juice_size_ml": null,
+      "recipe": "Pinned oats",
+      "recipe_type": "meal"
+    },
+    {
+      "day": 1,
+      "slot": "lunch",
+      "juice_time": null,
+      "juice_size_ml": null,
+      "recipe": "D1 lunch",
+      "recipe_type": "meal"
+    },
+    {
+      "day": 1,
+      "slot": "dinner",
+      "juice_time": null,
+      "juice_size_ml": null,
+      "recipe": "D1 dinner",
+      "recipe_type": "meal"
+    },
+    {
+      "day": 1,
+      "slot": "juice",
+      "juice_time": "morning",
+      "juice_size_ml": 500,
+      "recipe": "Green",
+      "recipe_type": "juice"
+    },
+    {
+      "day": 1,
+      "slot": "juice",
+      "juice_time": "pre_lunch",
+      "juice_size_ml": 250,
+      "recipe": "Ginger",
+      "recipe_type": "juice"
+    }
+  ]
+}

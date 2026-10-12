@@ -1,0 +1,981 @@
+{
+  "job_id": "bfb0ddf0-9e35-4154-9bda-2155049e1ff6",
+  "llm_output": {
+    "output": {
+      "days": [
+        {
+          "items": [
+            {
+              "fat_g": null,
+              "carbs_g": null,
+              "fiber_g": null,
+              "calories": null,
+              "servings": 1,
+              "protein_g": null,
+              "recipe_id": "6080ae5d-84b8-47f3-b6d7-bd58ca988b22",
+              "slot_type": "breakfast",
+              "juice_time": null,
+              "prep_method": null,
+              "recipe_title": "Mango Banana Smoothie Bowl",
+              "juice_size_ml": null,
+              "primary_protein": null,
+              "nutrition_unknown": false
+            },
+            {
+              "fat_g": null,
+              "carbs_g": null,
+              "fiber_g": null,
+              "calories": null,
+              "servings": 2,
+              "protein_g": null,
+              "recipe_id": "35104dda-8294-4c8f-8215-84b0b3bef3e2",
+              "slot_type": "juice",
+              "juice_time": "morning",
+              "prep_method": null,
+              "recipe_title": "Green Citrus Morning Juice",
+              "juice_size_ml": null,
+              "primary_protein": null,
+              "nutrition_unknown": false
+            },
+            {
+              "fat_g": null,
+              "carbs_g": null,
+              "fiber_g": null,
+              "calories": null,
+              "servings": 1,
+              "protein_g": null,
+              "recipe_id": "088b4b92-9566-4b27-b29a-4b5b9a67d2e2",
+              "slot_type": "juice",
+              "juice_time": "pre_lunch",
+              "prep_method": null,
+              "recipe_title": "Beet Ginger Pre-Lunch Shot",
+              "juice_size_ml": null,
+              "primary_protein": null,
+              "nutrition_unknown": false
+            },
+            {
+              "fat_g": null,
+              "carbs_g": null,
+              "fiber_g": null,
+              "calories": null,
+              "servings": 1,
+              "protein_g": null,
+              "recipe_id": "43b671ff-8949-4642-bdf9-e66d8fe77fae",
+              "slot_type": "lunch",
+              "juice_time": null,
+              "prep_method": null,
+              "recipe_title": "Tuna & Avocado Lettuce Wraps",
+              "juice_size_ml": null,
+              "primary_protein": null,
+              "nutrition_unknown": false
+            },
+            {
+              "fat_g": null,
+              "carbs_g": null,
+              "fiber_g": null,
+              "calories": null,
+              "servings": 1,
+              "protein_g": null,
+              "recipe_id": "f694bad6-05a0-4583-91a8-910a4e7713e9",
+              "slot_type": "dinner",
+              "juice_time": null,
+              "prep_method": null,
+              "recipe_title": "Baked Salmon with Steamed Broccoli & Quinoa",
+              "juice_size_ml": null,
+              "primary_protein": null,
+              "nutrition_unknown": false
+            }
+          ],
+          "day_number": 1
+        },
+        {
+          "items": [
+            {
+              "fat_g": null,
+              "carbs_g": null,
+              "fiber_g": null,
+              "calories": null,
+              "servings": 1,
+              "protein_g": null,
+              "recipe_id": "ea4f883a-be69-4074-a229-6f991c0b5067",
+              "slot_type": "breakfast",
+              "juice_time": null,
+              "prep_method": null,
+              "recipe_title": "Raw Overnight Oats with Apple & Almond Butter",
+              "juice_size_ml": null,
+              "primary_protein": null,
+              "nutrition_unknown": false
+            },
+            {
+              "fat_g": null,
+              "carbs_g": null,
+              "fiber_g": null,
+              "calories": null,
+              "servings": 2,
+              "protein_g": null,
+              "recipe_id": "35104dda-8294-4c8f-8215-84b0b3bef3e2",
+              "slot_type": "juice",
+              "juice_time": "morning",
+              "prep_method": null,
+              "recipe_title": "Green Citrus Morning Juice",
+              "juice_size_ml": null,
+              "primary_protein": null,
+              "nutrition_unknown": false
+            },
+            {
+              "fat_g": null,
+              "carbs_g": null,
+              "fiber_g": null,
+              "calories": null,
+              "servings": 1,
+              "protein_g": null,
+              "recipe_id": "088b4b92-9566-4b27-b29a-4b5b9a67d2e2",
+              "slot_type": "juice",
+              "juice_time": "pre_lunch",
+              "prep_method": null,
+              "recipe_title": "Beet Ginger Pre-Lunch Shot",
+              "juice_size_ml": null,
+              "primary_protein": null,
+              "nutrition_unknown": false
+            },
+            {
+              "fat_g": null,
+              "carbs_g": null,
+              "fiber_g": null,
+              "calories": null,
+              "servings": 1,
+              "protein_g": null,
+              "recipe_id": "7752efa8-6d08-42bc-8cb5-a703a7fb074a",
+              "slot_type": "lunch",
+              "juice_time": null,
+              "prep_method": null,
+              "recipe_title": "Zucchini Noodles with Avocado Pesto & Shrimp",
+              "juice_size_ml": null,
+              "primary_protein": null,
+              "nutrition_unknown": false
+            },
+            {
+              "fat_g": null,
+              "carbs_g": null,
+              "fiber_g": null,
+              "calories": null,
+              "servings": 1,
+              "protein_g": null,
+              "recipe_id": "a4a436a2-9b68-4c20-856d-b8674a420973",
+              "slot_type": "dinner",
+              "juice_time": null,
+              "prep_method": null,
+              "recipe_title": "Steamed Cod with Sweet Potato & Greens",
+              "juice_size_ml": null,
+              "primary_protein": null,
+              "nutrition_unknown": false
+            }
+          ],
+          "day_number": 2
+        },
+        {
+          "items": [
+            {
+              "fat_g": null,
+              "carbs_g": null,
+              "fiber_g": null,
+              "calories": null,
+              "servings": 1,
+              "protein_g": null,
+              "recipe_id": "2c8df9d0-1738-4e9c-be78-8d90b76b0360",
+              "slot_type": "breakfast",
+              "juice_time": null,
+              "prep_method": null,
+              "recipe_title": "Chia Seed Pudding with Berries",
+              "juice_size_ml": null,
+              "primary_protein": null,
+              "nutrition_unknown": false
+            },
+            {
+              "fat_g": null,
+              "carbs_g": null,
+              "fiber_g": null,
+              "calories": null,
+              "servings": 2,
+              "protein_g": null,
+              "recipe_id": "35104dda-8294-4c8f-8215-84b0b3bef3e2",
+              "slot_type": "juice",
+              "juice_time": "morning",
+              "prep_method": null,
+              "recipe_title": "Green Citrus Morning Juice",
+              "juice_size_ml": null,
+              "primary_protein": null,
+              "nutrition_unknown": false
+            },
+            {
+              "fat_g": null,
+              "carbs_g": null,
+              "fiber_g": null,
+              "calories": null,
+              "servings": 1,
+              "protein_g": null,
+              "recipe_id": "generate_new",
+              "slot_type": "juice",
+              "juice_time": "pre_lunch",
+              "prep_method": null,
+              "recipe_title": "Calming Cucumber Mint Cooler",
+              "juice_size_ml": null,
+              "primary_protein": null,
+              "nutrition_unknown": false
+            },
+            {
+              "fat_g": null,
+              "carbs_g": null,
+              "fiber_g": null,
+              "calories": null,
+              "servings": 1,
+              "protein_g": null,
+              "recipe_id": "e4264d3e-227a-42b8-bbca-b81bde882cb3",
+              "slot_type": "lunch",
+              "juice_time": null,
+              "prep_method": null,
+              "recipe_title": "Raw Collard Green Wraps with Salmon & Mango Salsa",
+              "juice_size_ml": null,
+              "primary_protein": null,
+              "nutrition_unknown": false
+            },
+            {
+              "fat_g": null,
+              "carbs_g": null,
+              "fiber_g": null,
+              "calories": null,
+              "servings": 1,
+              "protein_g": null,
+              "recipe_id": "402b569f-7685-47aa-be72-d093a142c280",
+              "slot_type": "dinner",
+              "juice_time": null,
+              "prep_method": null,
+              "recipe_title": "Baked Herb Trout with Roasted Asparagus & Brown Rice",
+              "juice_size_ml": null,
+              "primary_protein": null,
+              "nutrition_unknown": false
+            }
+          ],
+          "day_number": 3
+        }
+      ],
+      "review_notes": "Day 1 total \u2248 520+190+110+380+620 = 1820 kcal (within ~11% of 2050 target; slight shortfall offset by 2\u00d7 morning juice servings). Day 2 total \u2248 480+190+110+480+540 = 1800 kcal (~12% under; profile is 80% raw so lighter calorie density is expected \u2014 user may add a handful of nuts as a snack). Day 3 total \u2248 430+190+90+420+620 = 1750 kcal (~15% under for the same raw-focused reason). Raw % across saved candidates is heavily raw-dominant, consistent with the 80/20 cooking_type goal. Juices are reused across days (R9 green morning juice daily; R5 beet-ginger pre-lunch on days 1\u20132; Calming Cucumber Mint Cooler on day 3) to minimise food waste. No cheese or forbidden ingredients appear anywhere. No dish repeats within a single day.",
+      "generated_recipes": [
+        {
+          "steps": [
+            {
+              "tips": null,
+              "instruction": "Wash and roughly chop cucumber, celery, and green apple.",
+              "step_number": 1,
+              "duration_minutes": 3
+            },
+            {
+              "tips": null,
+              "instruction": "Feed all ingredients through a juicer. Add mint leaves last.",
+              "step_number": 2,
+              "duration_minutes": 3
+            },
+            {
+              "tips": null,
+              "instruction": "Squeeze in lemon juice, stir, and serve immediately over ice.",
+              "step_number": 3,
+              "duration_minutes": 1
+            }
+          ],
+          "title": "Calming Cucumber Mint Cooler",
+          "servings": 1,
+          "diet_type": "pescatarian",
+          "prep_type": "juiced",
+          "slot_type": "juice",
+          "assigned_id": null,
+          "ingredients": [
+            {
+              "unit": "medium",
+              "notes": null,
+              "quantity": "2",
+              "prep_type": null,
+              "ingredient_id": null,
+              "ingredient_name": "cucumber"
+            },
+            {
+              "unit": "g",
+              "notes": null,
+              "quantity": "10",
+              "prep_type": null,
+              "ingredient_id": null,
+              "ingredient_name": "fresh mint leaves"
+            },
+            {
+              "unit": "stalks",
+              "notes": null,
+              "quantity": "2",
+              "prep_type": null,
+              "ingredient_id": null,
+              "ingredient_name": "celery"
+            },
+            {
+              "unit": "whole",
+              "notes": null,
+              "quantity": "0.5",
+              "prep_type": null,
+              "ingredient_id": null,
+              "ingredient_name": "lemon"
+            },
+            {
+              "unit": "small",
+              "notes": null,
+              "quantity": "1",
+              "prep_type": null,
+              "ingredient_id": null,
+              "ingredient_name": "green apple"
+            }
+          ],
+          "primary_protein": "none",
+          "nutrition_per_serving": {
+            "fat_g": 0.5,
+            "fiber_g": 0.0,
+            "sugar_g": 14.0,
+            "protein_g": 2.0,
+            "sodium_mg": 45.0,
+            "calories_kcal": 90.0,
+            "carbohydrates_g": 20.0
+          }
+        }
+      ]
+    },
+    "handles": {
+      "R1": "6080ae5d-84b8-47f3-b6d7-bd58ca988b22",
+      "R2": "b961d841-0a64-4a1f-b5ac-d7384f0b7f54",
+      "R3": "43b671ff-8949-4642-bdf9-e66d8fe77fae",
+      "R4": "a4a436a2-9b68-4c20-856d-b8674a420973",
+      "R5": "088b4b92-9566-4b27-b29a-4b5b9a67d2e2",
+      "R6": "6eccb89a-d506-481b-a219-9326537e4464",
+      "R7": "7752efa8-6d08-42bc-8cb5-a703a7fb074a",
+      "R8": "402b569f-7685-47aa-be72-d093a142c280",
+      "R9": "35104dda-8294-4c8f-8215-84b0b3bef3e2",
+      "R10": "ea4f883a-be69-4074-a229-6f991c0b5067",
+      "R11": "e4264d3e-227a-42b8-bbca-b81bde882cb3",
+      "R12": "eac621b7-98a6-4035-b944-bc2faea8a6c6",
+      "R13": "2c8df9d0-1738-4e9c-be78-8d90b76b0360",
+      "R14": "f694bad6-05a0-4583-91a8-910a4e7713e9"
+    },
+    "roles": {
+      "088b4b92-9566-4b27-b29a-4b5b9a67d2e2": [],
+      "2c8df9d0-1738-4e9c-be78-8d90b76b0360": [
+        "breakfast"
+      ],
+      "35104dda-8294-4c8f-8215-84b0b3bef3e2": [],
+      "402b569f-7685-47aa-be72-d093a142c280": [
+        "dinner"
+      ],
+      "43b671ff-8949-4642-bdf9-e66d8fe77fae": [
+        "lunch"
+      ],
+      "6080ae5d-84b8-47f3-b6d7-bd58ca988b22": [
+        "breakfast"
+      ],
+      "6eccb89a-d506-481b-a219-9326537e4464": [
+        "breakfast"
+      ],
+      "7752efa8-6d08-42bc-8cb5-a703a7fb074a": [
+        "lunch"
+      ],
+      "a4a436a2-9b68-4c20-856d-b8674a420973": [
+        "dinner"
+      ],
+      "b961d841-0a64-4a1f-b5ac-d7384f0b7f54": [
+        "lunch"
+      ],
+      "e4264d3e-227a-42b8-bbca-b81bde882cb3": [
+        "lunch"
+      ],
+      "ea4f883a-be69-4074-a229-6f991c0b5067": [
+        "breakfast"
+      ],
+      "eac621b7-98a6-4035-b944-bc2faea8a6c6": [
+        "dinner"
+      ],
+      "f694bad6-05a0-4583-91a8-910a4e7713e9": [
+        "dinner"
+      ]
+    },
+    "titles": {
+      "088b4b92-9566-4b27-b29a-4b5b9a67d2e2": "Beet Ginger Pre-Lunch Shot",
+      "2c8df9d0-1738-4e9c-be78-8d90b76b0360": "Chia Seed Pudding with Berries",
+      "35104dda-8294-4c8f-8215-84b0b3bef3e2": "Green Citrus Morning Juice",
+      "402b569f-7685-47aa-be72-d093a142c280": "Baked Herb Trout with Roasted Asparagus & Brown Rice",
+      "43b671ff-8949-4642-bdf9-e66d8fe77fae": "Tuna & Avocado Lettuce Wraps",
+      "6080ae5d-84b8-47f3-b6d7-bd58ca988b22": "Mango Banana Smoothie Bowl",
+      "6eccb89a-d506-481b-a219-9326537e4464": "Green Spirulina Smoothie Bowl",
+      "7752efa8-6d08-42bc-8cb5-a703a7fb074a": "Zucchini Noodles with Avocado Pesto & Shrimp",
+      "a4a436a2-9b68-4c20-856d-b8674a420973": "Steamed Cod with Sweet Potato & Greens",
+      "b961d841-0a64-4a1f-b5ac-d7384f0b7f54": "Raw Rainbow Veggie Bowl with Tahini Dressing",
+      "e4264d3e-227a-42b8-bbca-b81bde882cb3": "Raw Collard Green Wraps with Salmon & Mango Salsa",
+      "ea4f883a-be69-4074-a229-6f991c0b5067": "Raw Overnight Oats with Apple & Almond Butter",
+      "eac621b7-98a6-4035-b944-bc2faea8a6c6": "Spicy Sesame Shrimp & Cauliflower Rice Bowl",
+      "f694bad6-05a0-4583-91a8-910a4e7713e9": "Baked Salmon with Steamed Broccoli & Quinoa"
+    },
+    "types": {
+      "088b4b92-9566-4b27-b29a-4b5b9a67d2e2": "juice",
+      "2c8df9d0-1738-4e9c-be78-8d90b76b0360": "meal",
+      "35104dda-8294-4c8f-8215-84b0b3bef3e2": "juice",
+      "402b569f-7685-47aa-be72-d093a142c280": "meal",
+      "43b671ff-8949-4642-bdf9-e66d8fe77fae": "meal",
+      "6080ae5d-84b8-47f3-b6d7-bd58ca988b22": "meal",
+      "6eccb89a-d506-481b-a219-9326537e4464": "meal",
+      "7752efa8-6d08-42bc-8cb5-a703a7fb074a": "meal",
+      "a4a436a2-9b68-4c20-856d-b8674a420973": "meal",
+      "b961d841-0a64-4a1f-b5ac-d7384f0b7f54": "meal",
+      "e4264d3e-227a-42b8-bbca-b81bde882cb3": "meal",
+      "ea4f883a-be69-4074-a229-6f991c0b5067": "meal",
+      "eac621b7-98a6-4035-b944-bc2faea8a6c6": "meal",
+      "f694bad6-05a0-4583-91a8-910a4e7713e9": "meal"
+    }
+  },
+  "plan_params": {
+    "duration_days": 3,
+    "diet_type": "pescatarian",
+    "cooking_type": "raw_80_cooked_20",
+    "calorie_target": 2050,
+    "sourcing_policy": "balanced",
+    "include_juicing": true,
+    "notes": null,
+    "week_start_date": "2026-10-19"
+  },
+  "skeleton_inputs": {
+    "duration_days": 3,
+    "include_juicing": true,
+    "juicing_config": [],
+    "pins": []
+  },
+  "snapshots": {
+    "eac621b7-98a6-4035-b944-bc2faea8a6c6": {
+      "recipe_id": "eac621b7-98a6-4035-b944-bc2faea8a6c6",
+      "title": "Spicy Sesame Shrimp & Cauliflower Rice Bowl",
+      "calories": 610.0,
+      "protein_g": 46.0,
+      "carbs_g": 52.0,
+      "fat_g": 20.0,
+      "fiber_g": 7.0,
+      "prep_method": "steamed",
+      "primary_protein": "fish",
+      "slot_hint": "dinner",
+      "ingredients": [
+        {
+          "name": "shrimp",
+          "ingredient_id": "bf71afef-655e-43c5-bc86-555dc46f8950"
+        },
+        {
+          "name": "cauliflower rice",
+          "ingredient_id": "34740952-7dcb-47f9-91f9-9018aff1a69a"
+        },
+        {
+          "name": "sesame oil",
+          "ingredient_id": "a49f409c-8d70-431a-842f-20d318925d76"
+        },
+        {
+          "name": "tamari (gluten-free soy sauce)",
+          "ingredient_id": "43a59063-7aec-45ad-9878-d2f56963bae6"
+        },
+        {
+          "name": "chili flakes",
+          "ingredient_id": "e4859fc6-a356-45f9-b47d-42c75fe07768"
+        },
+        {
+          "name": "spring onions",
+          "ingredient_id": "8c598cc0-03f4-45b0-b4a0-981c3e48047c"
+        }
+      ]
+    },
+    "ea4f883a-be69-4074-a229-6f991c0b5067": {
+      "recipe_id": "ea4f883a-be69-4074-a229-6f991c0b5067",
+      "title": "Raw Overnight Oats with Apple & Almond Butter",
+      "calories": 480.0,
+      "protein_g": 14.0,
+      "carbs_g": 62.0,
+      "fat_g": 20.0,
+      "fiber_g": 9.0,
+      "prep_method": "raw",
+      "primary_protein": "nuts_seeds",
+      "slot_hint": "breakfast",
+      "ingredients": [
+        {
+          "name": "rolled oats",
+          "ingredient_id": "317c6c4e-01b4-4d14-81f7-7090d81d0f58"
+        },
+        {
+          "name": "almond milk",
+          "ingredient_id": "be5d0657-5979-43bb-ae7e-f1f7a768469f"
+        },
+        {
+          "name": "almond butter",
+          "ingredient_id": "6c89918e-9c1d-475d-a67b-142013da9252"
+        },
+        {
+          "name": "apple",
+          "ingredient_id": "1d1ffc9d-4b98-439c-a990-d80f4430e6b2"
+        },
+        {
+          "name": "chia seeds",
+          "ingredient_id": "0b697404-3864-4ecd-b1fb-217f977f17de"
+        },
+        {
+          "name": "cinnamon",
+          "ingredient_id": "6cea19b1-4a79-4c89-a4ec-d68654df295a"
+        }
+      ]
+    },
+    "e4264d3e-227a-42b8-bbca-b81bde882cb3": {
+      "recipe_id": "e4264d3e-227a-42b8-bbca-b81bde882cb3",
+      "title": "Raw Collard Green Wraps with Salmon & Mango Salsa",
+      "calories": 420.0,
+      "protein_g": 28.0,
+      "carbs_g": 30.0,
+      "fat_g": 22.0,
+      "fiber_g": 7.0,
+      "prep_method": "raw",
+      "primary_protein": "fish",
+      "slot_hint": "lunch",
+      "ingredients": [
+        {
+          "name": "collard green leaves",
+          "ingredient_id": "5f044944-1942-4ae5-8c20-531d066c307b"
+        },
+        {
+          "name": "smoked salmon",
+          "ingredient_id": "ef6a2f5e-1572-4709-820d-802a88f895ee"
+        },
+        {
+          "name": "mango",
+          "ingredient_id": "679da3f1-0cec-408e-bb97-23e9ba850f56"
+        },
+        {
+          "name": "red onion",
+          "ingredient_id": "75f4a7cc-65e4-434e-a72f-e3e40ebab628"
+        },
+        {
+          "name": "avocado",
+          "ingredient_id": "5281ea94-d5dc-4918-bed4-d2938e0f5714"
+        },
+        {
+          "name": "lime juice",
+          "ingredient_id": "e317e430-9e67-44c2-93f8-d083ddf2b942"
+        }
+      ]
+    },
+    "402b569f-7685-47aa-be72-d093a142c280": {
+      "recipe_id": "402b569f-7685-47aa-be72-d093a142c280",
+      "title": "Baked Herb Trout with Roasted Asparagus & Brown Rice",
+      "calories": 620.0,
+      "protein_g": 46.0,
+      "carbs_g": 54.0,
+      "fat_g": 22.0,
+      "fiber_g": 6.0,
+      "prep_method": "baked",
+      "primary_protein": "fish",
+      "slot_hint": "dinner",
+      "ingredients": [
+        {
+          "name": "trout fillet",
+          "ingredient_id": "6977ce17-e42d-456f-8923-4240c3d4bfb4"
+        },
+        {
+          "name": "asparagus",
+          "ingredient_id": "b06ef5c9-f733-4293-ad3b-431ffea0b726"
+        },
+        {
+          "name": "brown rice",
+          "ingredient_id": "565cafca-c9ed-4ce0-9655-b8bce7c7f5c7"
+        },
+        {
+          "name": "olive oil",
+          "ingredient_id": "7f55de4f-5e68-4c4e-9ac8-8567b2574fa3"
+        },
+        {
+          "name": "garlic",
+          "ingredient_id": "7215bc71-ccd4-46f5-bd45-7e74418365db"
+        },
+        {
+          "name": "fresh dill",
+          "ingredient_id": "653a438e-287d-4dcf-8f07-133f840536a4"
+        }
+      ]
+    },
+    "6eccb89a-d506-481b-a219-9326537e4464": {
+      "recipe_id": "6eccb89a-d506-481b-a219-9326537e4464",
+      "title": "Green Spirulina Smoothie Bowl",
+      "calories": 430.0,
+      "protein_g": 14.0,
+      "carbs_g": 62.0,
+      "fat_g": 14.0,
+      "fiber_g": 8.0,
+      "prep_method": "blended",
+      "primary_protein": "nuts_seeds",
+      "slot_hint": "breakfast",
+      "ingredients": [
+        {
+          "name": "frozen banana",
+          "ingredient_id": "3844f1fe-7815-4cf3-a756-4aa1bc411162"
+        },
+        {
+          "name": "spinach",
+          "ingredient_id": "922d9fde-4cfe-409c-b694-7e549ec603a7"
+        },
+        {
+          "name": "spirulina powder",
+          "ingredient_id": "30810dec-51e3-4f29-8743-dbb33d0aab63"
+        },
+        {
+          "name": "almond milk",
+          "ingredient_id": "be5d0657-5979-43bb-ae7e-f1f7a768469f"
+        },
+        {
+          "name": "hemp seeds",
+          "ingredient_id": "55d96fcb-4edb-49d2-beb6-7252a12cc143"
+        },
+        {
+          "name": "kiwi",
+          "ingredient_id": "5aeee93f-ef9e-4c55-bc83-6802346d3130"
+        }
+      ]
+    },
+    "35104dda-8294-4c8f-8215-84b0b3bef3e2": {
+      "recipe_id": "35104dda-8294-4c8f-8215-84b0b3bef3e2",
+      "title": "Green Citrus Morning Juice",
+      "calories": 95.0,
+      "protein_g": 2.0,
+      "carbs_g": 22.0,
+      "fat_g": 0.5,
+      "fiber_g": 1.5,
+      "prep_method": "juiced",
+      "primary_protein": null,
+      "slot_hint": null,
+      "ingredients": [
+        {
+          "name": "cucumber",
+          "ingredient_id": "52b80f5f-ba5c-4b2b-92e6-205a1f4693df"
+        },
+        {
+          "name": "celery",
+          "ingredient_id": "60580797-c617-4f87-b666-ad9d31e9f128"
+        },
+        {
+          "name": "spinach",
+          "ingredient_id": "922d9fde-4cfe-409c-b694-7e549ec603a7"
+        },
+        {
+          "name": "green apple",
+          "ingredient_id": "ba1bf142-455c-4348-943d-96dc1751cc2b"
+        },
+        {
+          "name": "lemon",
+          "ingredient_id": "53d589d6-82f2-4ccf-9a33-83abde8fa8df"
+        },
+        {
+          "name": "fresh ginger",
+          "ingredient_id": "b96529d4-0d54-4b0a-bae8-f6e0052d971e"
+        }
+      ]
+    },
+    "088b4b92-9566-4b27-b29a-4b5b9a67d2e2": {
+      "recipe_id": "088b4b92-9566-4b27-b29a-4b5b9a67d2e2",
+      "title": "Beet Ginger Pre-Lunch Shot",
+      "calories": 110.0,
+      "protein_g": 2.5,
+      "carbs_g": 25.0,
+      "fat_g": 0.5,
+      "fiber_g": 2.0,
+      "prep_method": "juiced",
+      "primary_protein": null,
+      "slot_hint": null,
+      "ingredients": [
+        {
+          "name": "raw beet",
+          "ingredient_id": "bf3c7b46-4f74-4a48-a07a-01b555d49750"
+        },
+        {
+          "name": "carrot",
+          "ingredient_id": "30aaeeee-27ff-419f-bd76-22f1b724ba95"
+        },
+        {
+          "name": "fresh ginger",
+          "ingredient_id": "b96529d4-0d54-4b0a-bae8-f6e0052d971e"
+        },
+        {
+          "name": "lemon",
+          "ingredient_id": "53d589d6-82f2-4ccf-9a33-83abde8fa8df"
+        },
+        {
+          "name": "orange",
+          "ingredient_id": "d13fdab7-9baf-4553-b117-7b5e4f43e874"
+        }
+      ]
+    },
+    "6080ae5d-84b8-47f3-b6d7-bd58ca988b22": {
+      "recipe_id": "6080ae5d-84b8-47f3-b6d7-bd58ca988b22",
+      "title": "Mango Banana Smoothie Bowl",
+      "calories": 520.0,
+      "protein_g": 11.0,
+      "carbs_g": 80.0,
+      "fat_g": 18.0,
+      "fiber_g": 9.0,
+      "prep_method": "blended",
+      "primary_protein": "nuts_seeds",
+      "slot_hint": "breakfast",
+      "ingredients": [
+        {
+          "name": "frozen mango chunks",
+          "ingredient_id": "cb9e56a8-a7a3-4f30-87cc-5eb52b01b377"
+        },
+        {
+          "name": "banana",
+          "ingredient_id": "0d26d2d0-f0c7-40b1-989d-45279251244d"
+        },
+        {
+          "name": "coconut milk",
+          "ingredient_id": "b1e94b42-98f9-427b-ae5a-1a5b4c5ab709"
+        },
+        {
+          "name": "hemp seeds",
+          "ingredient_id": "55d96fcb-4edb-49d2-beb6-7252a12cc143"
+        },
+        {
+          "name": "mixed berries",
+          "ingredient_id": "6f32a2be-8e95-4c07-9f05-339f45c7016f"
+        },
+        {
+          "name": "granola (gluten-free)",
+          "ingredient_id": "c6a03987-1cde-43e2-a516-8377e703c917"
+        }
+      ]
+    },
+    "2c8df9d0-1738-4e9c-be78-8d90b76b0360": {
+      "recipe_id": "2c8df9d0-1738-4e9c-be78-8d90b76b0360",
+      "title": "Chia Seed Pudding with Berries",
+      "calories": 430.0,
+      "protein_g": 12.0,
+      "carbs_g": 46.0,
+      "fat_g": 22.0,
+      "fiber_g": 16.0,
+      "prep_method": "raw",
+      "primary_protein": "nuts_seeds",
+      "slot_hint": "breakfast",
+      "ingredients": [
+        {
+          "name": "chia seeds",
+          "ingredient_id": "0b697404-3864-4ecd-b1fb-217f977f17de"
+        },
+        {
+          "name": "almond milk",
+          "ingredient_id": "be5d0657-5979-43bb-ae7e-f1f7a768469f"
+        },
+        {
+          "name": "maple syrup",
+          "ingredient_id": "42456d9c-6b04-4824-b6fd-d3ce804f7012"
+        },
+        {
+          "name": "mixed berries",
+          "ingredient_id": "6f32a2be-8e95-4c07-9f05-339f45c7016f"
+        },
+        {
+          "name": "walnuts",
+          "ingredient_id": "42fcc614-0d94-4607-834e-d06d13c9e67e"
+        },
+        {
+          "name": "vanilla extract",
+          "ingredient_id": "c514acfc-9e79-4e87-a996-2868d8368cab"
+        }
+      ]
+    },
+    "7752efa8-6d08-42bc-8cb5-a703a7fb074a": {
+      "recipe_id": "7752efa8-6d08-42bc-8cb5-a703a7fb074a",
+      "title": "Zucchini Noodles with Avocado Pesto & Shrimp",
+      "calories": 480.0,
+      "protein_g": 32.0,
+      "carbs_g": 22.0,
+      "fat_g": 28.0,
+      "fiber_g": 10.0,
+      "prep_method": "raw",
+      "primary_protein": "fish",
+      "slot_hint": "lunch",
+      "ingredients": [
+        {
+          "name": "zucchini",
+          "ingredient_id": "090b2a50-2b13-4724-a001-8c789d306647"
+        },
+        {
+          "name": "avocado",
+          "ingredient_id": "5281ea94-d5dc-4918-bed4-d2938e0f5714"
+        },
+        {
+          "name": "fresh basil",
+          "ingredient_id": "8aecc843-9edc-4037-916c-e3b94091f716"
+        },
+        {
+          "name": "lemon juice",
+          "ingredient_id": "ce605b5d-84c6-4344-965b-3fa20a2930f6"
+        },
+        {
+          "name": "garlic",
+          "ingredient_id": "7215bc71-ccd4-46f5-bd45-7e74418365db"
+        },
+        {
+          "name": "cooked shrimp",
+          "ingredient_id": "6d7e2451-b25b-47b5-874c-36deb3295e85"
+        }
+      ]
+    },
+    "b961d841-0a64-4a1f-b5ac-d7384f0b7f54": {
+      "recipe_id": "b961d841-0a64-4a1f-b5ac-d7384f0b7f54",
+      "title": "Raw Rainbow Veggie Bowl with Tahini Dressing",
+      "calories": 390.0,
+      "protein_g": 12.0,
+      "carbs_g": 30.0,
+      "fat_g": 26.0,
+      "fiber_g": 8.0,
+      "prep_method": "raw",
+      "primary_protein": "nuts_seeds",
+      "slot_hint": "lunch",
+      "ingredients": [
+        {
+          "name": "mixed greens",
+          "ingredient_id": "1d05627e-ae06-4f5d-a570-23168d08bb6c"
+        },
+        {
+          "name": "shredded carrots",
+          "ingredient_id": "80ad69f4-9719-4d4f-827d-373a31d12154"
+        },
+        {
+          "name": "red cabbage",
+          "ingredient_id": "c8b04574-f4b0-4e4b-a3ce-ea2b1ad51429"
+        },
+        {
+          "name": "cucumber",
+          "ingredient_id": "52b80f5f-ba5c-4b2b-92e6-205a1f4693df"
+        },
+        {
+          "name": "tahini",
+          "ingredient_id": "4311692b-a92a-4328-a6d5-ff3fd9591754"
+        },
+        {
+          "name": "sunflower seeds",
+          "ingredient_id": "bfa3a0a5-14ec-4b71-8e68-9ed013f46d74"
+        }
+      ]
+    },
+    "43b671ff-8949-4642-bdf9-e66d8fe77fae": {
+      "recipe_id": "43b671ff-8949-4642-bdf9-e66d8fe77fae",
+      "title": "Tuna & Avocado Lettuce Wraps",
+      "calories": 380.0,
+      "protein_g": 36.0,
+      "carbs_g": 14.0,
+      "fat_g": 16.0,
+      "fiber_g": 7.0,
+      "prep_method": "raw",
+      "primary_protein": "fish",
+      "slot_hint": "lunch",
+      "ingredients": [
+        {
+          "name": "canned tuna in water",
+          "ingredient_id": "a8f54665-401c-4ed4-85f0-449c6e986cfc"
+        },
+        {
+          "name": "avocado",
+          "ingredient_id": "5281ea94-d5dc-4918-bed4-d2938e0f5714"
+        },
+        {
+          "name": "lemon juice",
+          "ingredient_id": "ce605b5d-84c6-4344-965b-3fa20a2930f6"
+        },
+        {
+          "name": "romaine lettuce leaves",
+          "ingredient_id": "75bb20f7-b81f-47c1-af17-b84172e47e7d"
+        },
+        {
+          "name": "cherry tomatoes",
+          "ingredient_id": "487fc61e-4184-4f2e-a65c-891e616e15e2"
+        },
+        {
+          "name": "red onion",
+          "ingredient_id": "75f4a7cc-65e4-434e-a72f-e3e40ebab628"
+        }
+      ]
+    },
+    "f694bad6-05a0-4583-91a8-910a4e7713e9": {
+      "recipe_id": "f694bad6-05a0-4583-91a8-910a4e7713e9",
+      "title": "Baked Salmon with Steamed Broccoli & Quinoa",
+      "calories": 620.0,
+      "protein_g": 48.0,
+      "carbs_g": 54.0,
+      "fat_g": 22.0,
+      "fiber_g": 7.0,
+      "prep_method": "baked",
+      "primary_protein": "fish",
+      "slot_hint": "dinner",
+      "ingredients": [
+        {
+          "name": "salmon fillet",
+          "ingredient_id": "6cc816af-046d-41c5-b7b0-bd9c102ecc89"
+        },
+        {
+          "name": "quinoa",
+          "ingredient_id": "e986ccf3-a9cd-47e3-a12a-f0d742bee525"
+        },
+        {
+          "name": "broccoli florets",
+          "ingredient_id": "3105c491-fe65-4901-849d-600bc63d8daa"
+        },
+        {
+          "name": "olive oil",
+          "ingredient_id": "7f55de4f-5e68-4c4e-9ac8-8567b2574fa3"
+        },
+        {
+          "name": "lemon juice",
+          "ingredient_id": "ce605b5d-84c6-4344-965b-3fa20a2930f6"
+        },
+        {
+          "name": "garlic powder",
+          "ingredient_id": "f6a6ef37-fcc4-455e-ba0c-bc054a427a23"
+        }
+      ]
+    },
+    "a4a436a2-9b68-4c20-856d-b8674a420973": {
+      "recipe_id": "a4a436a2-9b68-4c20-856d-b8674a420973",
+      "title": "Steamed Cod with Sweet Potato & Greens",
+      "calories": 540.0,
+      "protein_g": 42.0,
+      "carbs_g": 58.0,
+      "fat_g": 14.0,
+      "fiber_g": 8.0,
+      "prep_method": "steamed",
+      "primary_protein": "fish",
+      "slot_hint": "dinner",
+      "ingredients": [
+        {
+          "name": "cod fillet",
+          "ingredient_id": "c1a2abd5-9b31-4180-8b6e-e885ee2f31a1"
+        },
+        {
+          "name": "sweet potato",
+          "ingredient_id": "652eac03-aec9-4c67-88d1-503eb89ce3ee"
+        },
+        {
+          "name": "spinach",
+          "ingredient_id": "922d9fde-4cfe-409c-b694-7e549ec603a7"
+        },
+        {
+          "name": "olive oil",
+          "ingredient_id": "7f55de4f-5e68-4c4e-9ac8-8567b2574fa3"
+        },
+        {
+          "name": "ginger",
+          "ingredient_id": "f16cd7fc-4316-44a7-ac78-659d77d4d27a"
+        },
+        {
+          "name": "tamari (low sodium)",
+          "ingredient_id": "59368977-e24b-463f-9b67-5e5c79f34b3e"
+        }
+      ]
+    }
+  }
+}
