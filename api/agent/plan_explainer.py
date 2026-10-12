@@ -8,14 +8,14 @@ from typing import Any
 from uuid import UUID
 
 import structlog
-from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
-
-from agent.client import AnthropicClient
 from config import AgentTask, route_model
 from db.models import PlanDay, PlanItem
 from services.plan_service import PlanService
 from services.profile_service import ProfileService
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from agent.client import AnthropicClient
 
 logger = structlog.get_logger(__name__)
 
@@ -132,6 +132,8 @@ class PlanExplainerAgent:
             tools=None,
             max_tokens=_MAX_TOKENS,
             system=system_prompt,
+            user_id=user_id,
+            task=AgentTask.PLAN_EXPLANATION.value,
         ):
             if isinstance(item, str):
                 yield item

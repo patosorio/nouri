@@ -11,8 +11,6 @@ from uuid import UUID
 import structlog
 from anthropic.types import ToolUseBlock
 from pydantic import BaseModel, ValidationError
-from sqlalchemy.ext.asyncio import AsyncSession
-
 from schemas.agent import (
     AgentContext,
     ExpandRecipeInput,
@@ -24,6 +22,7 @@ from schemas.agent import (
     GetShoppingListInput,
     GetUserProfileInput,
     ImportRecipeInput,
+    PlanProposal,
     ProposeProfileUpdateInput,
     SaveRecipeInput,
     SearchRecipesInput,
@@ -31,7 +30,6 @@ from schemas.agent import (
     TriggerPlanGenerationInput,
     UpdatePantryInput,
 )
-from schemas.plans import PlanGenerationParams
 from schemas.recipes import RecipeDraft as ServiceRecipeDraft
 from schemas.recipes import RecipeFilters
 from services.pantry_service import PantryService
@@ -39,6 +37,7 @@ from services.plan_service import PlanService
 from services.profile_service import ProfileService
 from services.recipe_service import RecipeService
 from services.shopping_list_service import ShoppingListService
+from sqlalchemy.ext.asyncio import AsyncSession
 
 logger = structlog.get_logger(__name__)
 
@@ -95,20 +94,31 @@ async def _handle_trigger_plan_generation(
     db: AsyncSession,
     context: AgentContext,
 ) -> Any:
+    """Fill the generate form. Does not enqueue — user confirms in the UI."""
     data = TriggerPlanGenerationInput.model_validate(raw)
     profile = await ProfileService().get_profile(user_id, db)
-    params = PlanGenerationParams(
-        duration_days=data.duration_days,
+    juicing = (
+        data.include_juicing
+        if data.include_juicing is not None
+        else profile.juicing_enabled
+    )
+    proposal = PlanProposal(
+        num_days=data.duration_days,
         diet_type=data.diet_type or profile.diet_type,
         cooking_type=data.cooking_type or profile.cooking_type,
-        calorie_target=data.calorie_target or profile.calorie_target,
-        sourcing_policy=data.sourcing_policy or profile.recipe_usage_policy,
-        include_juicing=data.include_juicing,
+        calorie_target=(
+            data.calorie_target
+            if data.calorie_target is not None
+            else profile.calorie_target
+        ),
+        recipe_usage_policy=data.sourcing_policy or profile.recipe_usage_policy,
+        include_juicing=juicing,
         notes=data.notes,
-        conversation_id=None,
     )
-    plan, _job = await PlanService().create_plan_stub(user_id, params, db)
-    return {"plan_id": str(plan.id), "status": plan.status.value, "job_enqueued": True}
+    return {
+        "status": "awaiting_confirmation",
+        "proposal": proposal.model_dump(mode="json"),
+    }
 
 
 async def _handle_get_plan(
@@ -139,8 +149,9 @@ async def _handle_generate_recipe(
     db: AsyncSession,
     context: AgentContext,
 ) -> Any:
-    from agent.recipe_generator import RecipeGeneratorAgent
     from schemas.agent import RecipeGenerationRequest
+
+    from agent.recipe_generator import RecipeGeneratorAgent
 
     data = GenerateRecipeInput.model_validate(raw)
     request = RecipeGenerationRequest(
@@ -202,7 +213,15 @@ async def _handle_save_recipe(
     data = SaveRecipeInput.model_validate(raw)
     draft = ServiceRecipeDraft.model_validate(data.draft)
     recipe = await RecipeService().save_recipe(user_id, draft, db)
-    await RecipeSearchService().embed_recipe(recipe, db)
+    try:
+        await RecipeSearchService().embed_recipe(recipe, db)
+    except Exception as exc:
+        logger.exception(
+            "recipe_embed_failed_soft",
+            recipe_id=str(recipe.id),
+            error=str(exc),
+            trace_id=context.trace_id,
+        )
     return {"recipe_id": str(recipe.id), "name": recipe.name}
 
 
@@ -231,8 +250,9 @@ async def _handle_expand_recipe(
     db: AsyncSession,
     context: AgentContext,
 ) -> Any:
-    from agent.recipe_generator import RecipeGeneratorAgent
     from schemas.agent import RecipeGenerationRequest
+
+    from agent.recipe_generator import RecipeGeneratorAgent
 
     data = ExpandRecipeInput.model_validate(raw)
     request = RecipeGenerationRequest(
@@ -416,7 +436,13 @@ def chat_tool_definitions() -> list[dict[str, Any]]:
     """Anthropic tool schemas derived from Pydantic models (docs/2_SAD.md §6.4)."""
     tools: list[dict[str, Any]] = []
     descriptions = {
-        "trigger_plan_generation": "Enqueue a meal plan generation job. Returns plan_id.",
+        "trigger_plan_generation": (
+            "Fill the on-screen plan generation form from this conversation. "
+            "Does not start generation. The user reviews diet, cooking type, "
+            "juicing, and notes, then presses Generate. Never write a day-by-day "
+            "meal plan in chat — the structured generator builds the actual week "
+            "after they confirm."
+        ),
         "get_plan": "Retrieve an existing meal plan by ID.",
         "swap_meal": "Replace a single meal slot recipe in a plan.",
         "generate_recipe": "Generate a structured recipe draft (not yet saved).",

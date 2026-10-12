@@ -2,24 +2,54 @@
 
 from __future__ import annotations
 
+import json
 from collections.abc import AsyncIterator
 from typing import Any
 from uuid import UUID
 
 import structlog
 from anthropic.types import ToolUseBlock
-from sqlalchemy.ext.asyncio import AsyncSession
-
-from agent.client import AnthropicClient
-from agent.tool_executor import AgentToolExecutor, chat_tool_definitions
 from config import AgentTask, route_model, settings
 from db.models import Conversation
-from schemas.agent import AgentContext, SSEEvent
+from exceptions import SpendLimitExceeded
+from pydantic import ValidationError
+from schemas.agent import AgentContext, PlanProposal, SSEEvent
 from services.profile_service import ProfileService
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from agent.client import (
+    AnthropicClient,
+    cached_system_blocks,
+    with_cached_last_tool,
+)
+from agent.tool_executor import AgentToolExecutor, chat_tool_definitions
 
 logger = structlog.get_logger(__name__)
 
 _HISTORY_WINDOW = 20
+
+
+def plan_proposal_from_tool_result(result: dict[str, Any]) -> PlanProposal | None:
+    if result.get("is_error"):
+        return None
+    raw = result.get("content")
+    if not isinstance(raw, str):
+        return None
+    try:
+        payload = json.loads(raw)
+    except json.JSONDecodeError:
+        return None
+    if not isinstance(payload, dict):
+        return None
+    if payload.get("status") != "awaiting_confirmation":
+        return None
+    proposal = payload.get("proposal")
+    if not isinstance(proposal, dict):
+        return None
+    try:
+        return PlanProposal.model_validate(proposal)
+    except ValidationError:
+        return None
 
 CHAT_SYSTEM_PROMPT = """\
 You are Nouri — a plant-based nutritional food advisor and chef. You help people \
@@ -52,6 +82,14 @@ get_recipe first and answer from what comes back. If the user asks you to change
 something on their profile (diet type, calorie target, exclusions, etc.), call \
 propose_profile_update and lay out the proposed change plainly; don't apply \
 anything until they confirm in a following message.
+
+When the user wants a new meal plan, call trigger_plan_generation with parameters \
+inferred from the conversation (use profile defaults for anything they did not \
+specify). That fills a form on their screen — it does not generate the week. \
+Never write a day-by-day meal plan, recipe card, or weekly nutrition summary in \
+chat. Tell them the form is ready on the right, they can change diet or cooking \
+type for this plan only without changing their profile, and they press Generate \
+when it looks right. Do not claim the plan is already built.
 
 Exclusions: the profile below lists ingredients this user has excluded. Never \
 suggest a recipe or meal containing one of them — no exceptions, no substitutions \
@@ -92,14 +130,14 @@ class ChatAgent:
         context = await self._enrich_context(user_id, context, db)
 
         history = list(conversation.messages or [])
-        messages = self._build_messages(history, new_message)
-        system = self._build_system_prompt(context)
+        messages = self._build_messages(history, new_message, context)
+        system = cached_system_blocks(CHAT_SYSTEM_PROMPT)
 
         assistant_content: list[dict[str, Any]] = []
         collected_text: list[str] = []
         max_turns = settings.agent_max_tool_iterations
         model = route_model(AgentTask.CONVERSATION)
-        tools = chat_tool_definitions()
+        tools = with_cached_last_tool(chat_tool_definitions())
 
         try:
             for turn in range(1, max_turns + 1):
@@ -113,6 +151,8 @@ class ChatAgent:
                     system=system,
                     max_tokens=4096,
                     trace_id=context.trace_id,
+                    user_id=user_id,
+                    task=AgentTask.CONVERSATION.value,
                 ):
                     if isinstance(item, str):
                         turn_text.append(item)
@@ -166,6 +206,14 @@ class ChatAgent:
                         block, user_id=user_id, db=db, context=context
                     )
                     tool_results.append(result)
+                    if block.name == "trigger_plan_generation":
+                        proposal = plan_proposal_from_tool_result(result)
+                        if proposal is not None:
+                            yield SSEEvent(
+                                type="plan_proposal",
+                                plan_proposal=proposal,
+                                conversation_id=conversation.id,
+                            )
                 messages.append({"role": "user", "content": tool_results})
             else:
                 yield SSEEvent(
@@ -183,6 +231,18 @@ class ChatAgent:
                 conversation, new_message, assistant_content, db
             )
             yield SSEEvent(type="done", conversation_id=conversation.id)
+        except SpendLimitExceeded:
+            logger.warning(
+                "chat_spend_limit",
+                conversation_id=str(conversation_id),
+                trace_id=context.trace_id,
+            )
+            yield SSEEvent(
+                type="error",
+                error="Nouri is temporarily unavailable. Please try again later.",
+                code="SPEND_LIMIT_EXCEEDED",
+                conversation_id=conversation_id,
+            )
         except Exception as exc:
             logger.exception(
                 "chat_agent_failed",
@@ -196,7 +256,7 @@ class ChatAgent:
                 conversation_id=conversation_id,
             )
 
-    def _build_system_prompt(self, context: AgentContext) -> str:
+    def _turn_context(self, context: AgentContext) -> str:
         profile_block = {
             "diet_type": context.diet_type.value if context.diet_type else None,
             "cooking_type": context.cooking_type.value if context.cooking_type else None,
@@ -213,13 +273,12 @@ class ChatAgent:
             else None,
         }
         return (
-            CHAT_SYSTEM_PROMPT
-            + f"\n<user_profile>{profile_block}</user_profile>\n"
-            + f"<active_context>{active}</active_context>\n"
+            f"<user_profile>{profile_block}</user_profile>\n"
+            f"<active_context>{active}</active_context>"
         )
 
     def _build_messages(
-        self, history: list[Any], new_message: str
+        self, history: list[Any], new_message: str, context: AgentContext
     ) -> list[dict[str, Any]]:
         messages: list[dict[str, Any]] = []
 
@@ -251,7 +310,10 @@ class ChatAgent:
         messages.append(
             {
                 "role": "user",
-                "content": f"<user_content>{new_message}</user_content>",
+                "content": (
+                    f"{self._turn_context(context)}\n"
+                    f"<user_content>{new_message}</user_content>"
+                ),
             }
         )
         return messages
